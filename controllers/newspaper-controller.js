@@ -8,7 +8,10 @@ const getContent = async(req, res, next) => {
     );
     const text = await response.text();
     const $ = cheerio.load(text);
-    const result = $('.nd-content-column p').text().trim();
+    var result =""
+    $('.nd-content-column p').each((i,p)=>{
+      result = result.concat($(p).text().trim());
+    });
 
     res.status(200).json({data:result});
 }
