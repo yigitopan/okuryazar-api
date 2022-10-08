@@ -3,7 +3,9 @@ const cheerio = require("cheerio")
 
 const getContent = async(req, res, next) => {
     const newspaper = req.params.newspaper
-
+    var nachrichten = {
+        nachrictArray: []
+    };
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
     if(newspaper === "milliyet") {
@@ -33,51 +35,65 @@ const getContent = async(req, res, next) => {
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
 
 
-
-
-
 //// --SABAH-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
     else if (newspaper === "sabah") {
-        const response = await fetch(
-            'https://www.sabah.com.tr/gundem/2022/10/07/son-dakika-mansur-yavastan-ankarada-tum-su-tarifelerine-yuzde-50-indirim-getiren-karara-veto?paging=2'
+    if(req.params.subject == "gundem") {
+
+        const responseSubject = await fetch(
+            'https://www.sabah.com.tr/gundem'
         );
-        const text = await response.text();
-        const $ = cheerio.load(text);
-        var scripts = ""
-        var mainScript = ""
-        var content = ""
-        var spot = ""
 
-        $('script').each((idx, script) => {
-            scripts = scripts.concat($(script).text());
-            if($(script).text().includes('NewsArticle')) {
-                mainScript = $(script).text()
-            }
+        const subjectText = await responseSubject.text();
+        var $ = cheerio.load(subjectText);
+        var nachrichtenURLS = [];
+
+        $('.headlineNumeric ul li a').each((i,a)=>{
+            nachrichtenURLS.push($(a).attr('href'))
         });
 
-        scripts =  scripts.split(`NewsArticle"`).pop().split(`keywords`)[0].trim(); // returns 'two'
 
-        content =  scripts.split(`articleBody`).pop().split(`description`)[0].trim();  // returns 'two'
-        spot =  scripts.split(`description`).pop().split(`articleBody`)[0].trim();  // returns 'two'
+        await Promise.all(nachrichtenURLS.map(async url =>  {
+                const response = await fetch(
+                    `https://www.sabah.com.tr${url}`
+                );
 
-        $('.newsBox.selectionShareable p').each((i ,p)=>{
-            content = content.concat($(p).text());
-        });
+                const text = await response.text(); 
+                var $ = cheerio.load(text);
+                var scripts = ""
+                var mainScript = ""
+                var content = ""
+                var spot = ""
 
-        var newsObject = 
-        {
-            title: $('figure.newsImage img').attr('alt'),
-            spot,
-            date: $('.news-detail-info span span').first().text(),
-            image: $('figure.newsImage').find('img').attr('src'),
-            content
-        }
+                $('script').each((idx, script) => {
+                    scripts = scripts.concat($(script).text());
+                    if($(script).text().includes('NewsArticle')) {
+                        mainScript = $(script).text()
+                    }
+                });
 
-        
+                scripts =  scripts.split(`NewsArticle"`).pop().split(`keywords`)[0].trim(); // returns 'two'
+
+                content =  scripts.split(`articleBody`).pop().split(`description`)[0].trim();  // returns 'two'
+                spot =  scripts.split(`description`).pop().split(`articleBody`)[0].trim();  // returns 'two'
+
+                $('.newsBox.selectionShareable p').each((i ,p)=>{
+                    content = content.concat($(p).text());
+                });
+
+                var newsObject = 
+                {
+                    title: $('figure.newsImage img').attr('alt'),
+                    spot,
+                    date: $('.news-detail-info span span').first().text(),
+                    image: $('figure.newsImage').find('img').attr('src'),
+                    content
+                }
+                nachrichten.nachrictArray.push(newsObject)
+        }))
+
     }
+}
 //// --SABAH-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SABAH-- ////
-
-
 
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
@@ -105,9 +121,7 @@ else if (newspaper === "sozcu") {
     }
 }
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
-
-
-    res.status(200).json({data:newsObject});
+    res.status(200).json({data:nachrichten});
 }
 
 module.exports = {
