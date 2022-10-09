@@ -37,10 +37,9 @@ const getContent = async(req, res, next) => {
 
 //// --SABAH-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
     else if (newspaper === "sabah") {
-    if(req.params.subject == "gundem") {
 
         const responseSubject = await fetch(
-            'https://www.sabah.com.tr/gundem'
+            `https://www.sabah.com.tr/${req.params.subject}` //gundem-yasam-saglik-dünya-turizm
         );
 
         const subjectText = await responseSubject.text();
@@ -53,8 +52,14 @@ const getContent = async(req, res, next) => {
 
 
         await Promise.all(nachrichtenURLS.map(async url =>  {
+                var fullUrl = `https://www.sabah.com.tr${url}`
+
+                if(url.includes('sabah.com.tr')){
+                    fullUrl = url;
+                }
+
                 const response = await fetch(
-                    `https://www.sabah.com.tr${url}`
+                    `${fullUrl}`
                 );
 
                 const text = await response.text(); 
@@ -91,7 +96,6 @@ const getContent = async(req, res, next) => {
                 nachrichten.nachrictArray.push(newsObject)
         }))
 
-    }
 }
 //// --SABAH-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SABAH-- ////
 
