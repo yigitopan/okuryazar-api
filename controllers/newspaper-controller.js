@@ -8,12 +8,29 @@ const getContent = async(req, res, next) => {
     };
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
-    if(newspaper === "milliyet") {
+    if(newspaper === "milliyet"){
+
+        const responseSubject = await fetch(
+            `https://www.milliyet.com.tr/${req.params.subject}` //gundem-ekonomi-dünya
+        );
+
+        const subjectText = await responseSubject.text();
+        var $ = cheerio.load(subjectText);
+        var nachrichtenURLS = [];
+
+        $('a.category-card').each((i,a)=>{
+            nachrichtenURLS.push($(a).attr('href'))
+        });
+
+
+        await Promise.all(nachrichtenURLS.map(async url =>  {
+        
+
             const response = await fetch(
-                'http://www.milliyet.com.tr/ekonomi/memur-sen-genel-baskani-ali-yalcindan-onemli-aciklamalar-6837129'
+                `http://www.milliyet.com.tr${url}`
             );
             const text = await response.text();
-            const $ = cheerio.load(text);
+            var $ = cheerio.load(text);
             var content = ""
 
             $('.nd-content-column p').each((i,p)=>{
@@ -31,6 +48,9 @@ const getContent = async(req, res, next) => {
                 image: $('.nd-article__spot-img').find('img').attr('data-src'),
                 content
             }
+            nachrichten.nachrictArray.push(newsObject)
+        }))
+
     }
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
 
@@ -39,7 +59,7 @@ const getContent = async(req, res, next) => {
     else if (newspaper === "sabah") {
 
         const responseSubject = await fetch(
-            `https://www.sabah.com.tr/${req.params.subject}` //gundem-yasam-saglik-dünya-turizm
+            `https://www.sabah.com.tr/${req.params.subject}` //gundem-yasam-saglik-dünya
         );
 
         const subjectText = await responseSubject.text();
