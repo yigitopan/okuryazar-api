@@ -121,12 +121,36 @@ const getContent = async(req, res, next) => {
 
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
-else if (newspaper === "sozcu") {
-    const response = await fetch(
-        'https://www.sozcu.com.tr/2022/gundem/esi-ile-cocugunu-olduren-kisi-yakalanacagini-anlayinca-intihar-etti-7407389/?utm_source=anasayfa&utm_medium=free&utm_campaign=alt_surmanset'
+else if (newspaper === "sozcu") { 
+    var subject = `kategori/${req.params.subject}`;
+
+    if(req.params.subject == "hayat"){
+        subject = `hayatim`;
+    }
+
+    else if(req.params.subject == "spor"){
+        subject = `spor`;
+    }
+
+    const responseSubject = await fetch(
+        `https://www.sozcu.com.tr/${subject}` //gundem-spor-hayat-dünya-ekonomi- otomotiv
     );
+
+    const subjectText = await responseSubject.text();
+    var $ = cheerio.load(subjectText);
+    var nachrichtenURLS = [];
+
+    $('div.news-item a.img-holder').each((i,a)=>{
+        nachrichtenURLS.push($(a).attr('href'))
+    });
+
+    await Promise.all(nachrichtenURLS.map(async url =>  {
+    const response = await fetch(
+        `${url}`
+    );
+
     const text = await response.text();
-    const $ = cheerio.load(text);
+    var $ = cheerio.load(text);
 
     var content = ""
 
@@ -143,6 +167,10 @@ else if (newspaper === "sozcu") {
         image: $('.img-holder').find('img').attr('src'),
         content
     }
+
+    nachrichten.nachrictArray.push(newsObject)
+}))
+
 }
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
     res.status(200).json({data:nachrichten});
