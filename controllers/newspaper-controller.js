@@ -132,6 +132,10 @@ else if (newspaper === "sozcu") {
         subject = `spor`;
     }
 
+    else if(req.params.subject == "finans"){
+        subject = `finans`;
+    }
+
     const responseSubject = await fetch(
         `https://www.sozcu.com.tr/${subject}` //gundem-spor-hayat-dünya-ekonomi- otomotiv
     );
