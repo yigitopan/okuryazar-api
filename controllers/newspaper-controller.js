@@ -302,7 +302,7 @@ else if (newspaper === "sozcu") {
         title: $('article').find('h1').first().text(),
         spot: $('h2.spot').text(),
         date: finalDate,
-        image: $('.img-holder').find('img').attr('src'),
+        image: $('.main-img .img-holder').find('img').attr('src'),
         content,
         newspaperID,
         categoryName
