@@ -60,6 +60,21 @@ const pushNewsToDb = async(newObj) => {
 }
 
 
+const getAllNews = async(req, res, next) => { 
+    const text = 'SELECT * FROM public.news ORDER BY news_id ASC'
+    let news;
+            try {
+                const res = await client.query(text)
+                news = res.rows;
+            } 
+            catch (err) {
+                console.log("error adding")
+            }
+
+            res.status(200).json({data:news});
+}
+
+
 const getContent = async(req, res, next) => {
     const newspaper = req.params.newspaper
     var nachrichten = {
@@ -303,5 +318,5 @@ else if (newspaper === "sozcu") {
 }
 
 module.exports = {
-    getContent
+    getContent, getAllNews
 }

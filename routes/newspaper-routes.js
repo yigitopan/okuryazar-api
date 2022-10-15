@@ -5,4 +5,6 @@ const router = express.Router();
 //router.get('/:newspaper', newspaperController.getContent);
 router.get('/:newspaper/:subject', newspaperController.getContent);
 
+router.get('/getallnews', newspaperController.getAllNews);
+
 module.exports = router;
