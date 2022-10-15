@@ -1,5 +1,64 @@
 const fetch = require("isomorphic-fetch")
 const cheerio = require("cheerio")
+const { Pool, Client } = require("pg");
+
+const newspapers = ["Sözcü", "Milliyet", "Sabah"]
+
+  const client = new Client({
+    user: "cdxrgqfcgtvltf",
+    host: "ec2-54-228-30-162.eu-west-1.compute.amazonaws.com",
+    database: "d5ud7bjn2cgbk8",
+    password: "481266c06afa99716d093c1253d8333750c668b7e050d2f6fdcd179c3be09103",
+    port: 5432,
+    ssl:{
+        rejectUnauthorized:false
+    }
+});
+
+
+client.connect();
+  
+  
+
+const pushNewsToDb = async(newObj) => {
+    const search = newObj.title.replace("'","''")
+    const check = `SELECT EXISTS (SELECT news_id FROM news WHERE title LIKE '${search}') AS it_does_exist; `
+    const text = 'INSERT INTO news(title, spot, date, img_url, context, newspaper_id, category_name) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *'
+
+    const values = [
+        newObj.title,
+        newObj.spot,
+        newObj.date,
+        newObj.image,
+        newObj.content,
+        newObj.newspaperID,
+        newObj.categoryName
+    ] 
+
+    try {
+        const exists = await client.query(check)
+        
+        if(exists.rows[0].it_does_exist === true) {
+            console.log("already exists")
+        }
+        else  {
+            try {
+                const res = await client.query(text, values)
+                console.log("added")
+            } 
+            catch (err) {
+                console.log("error adding")
+            }
+
+        }
+    } 
+    catch (err) {
+        console.log("error checking")
+    }
+
+   
+}
+
 
 const getContent = async(req, res, next) => {
     const newspaper = req.params.newspaper
@@ -7,8 +66,25 @@ const getContent = async(req, res, next) => {
         nachrictArray: []
     };
 
+
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
     if(newspaper === "milliyet"){
+        const newspaperName = "Milliyet"
+        const newspaperID = newspapers.indexOf(newspaperName) + 1;
+
+        let categoryName;
+
+        if(req.params.subject == "gundem") {
+            categoryName = "Gündem"
+        }
+
+        else if(req.params.subject == "ekonomi") {
+            categoryName = "Ekonomi"
+        }
+
+        else if(req.params.subject == "dunya") {
+            categoryName = "Dünya"
+        }
 
         const responseSubject = await fetch(
             `https://www.milliyet.com.tr/${req.params.subject}` //gundem-ekonomi-dünya
@@ -37,18 +113,28 @@ const getContent = async(req, res, next) => {
                 content = content.concat($(p).text().trim());
             });
 
+            var dateString =  $('.nd-article__info-block').first().contents().filter(function() {
+                return this.type === 'text';
+            }).text().substring(0,10)
+
+            var dateArray = dateString.split('.');
+            // dateArray[0] 15 (gun)
+            // dateArray[1] 10 (ay)
+            // dateArray[2] 2022 (yil)
+
+            var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
             var newsObject = 
             {
                 title: $('h1.nd-article__title').text(),
                 spot: $('h2.nd-article__spot').text(),
-                date: $('.nd-article__info-block').first().contents().filter(function() {
-                    return this.type === 'text';
-                }).text().substring(0,8),
-                
+                date: finalDate,
                 image: $('.nd-article__spot-img').find('img').attr('data-src'),
-                content
+                content,
+                newspaperID,
+                categoryName
             }
-            nachrichten.nachrictArray.push(newsObject)
+            pushNewsToDb(newsObject)
+            //nachrichten.nachrictArray.push(newsObject)
         }))
 
     }
@@ -69,7 +155,6 @@ const getContent = async(req, res, next) => {
         $('.headlineNumeric ul li a').each((i,a)=>{
             nachrichtenURLS.push($(a).attr('href'))
         });
-
 
         await Promise.all(nachrichtenURLS.map(async url =>  {
                 var fullUrl = `https://www.sabah.com.tr${url}`
@@ -122,6 +207,29 @@ const getContent = async(req, res, next) => {
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
 else if (newspaper === "sozcu") { 
+    const newspaperName = "Sözcü"
+    const newspaperID = newspapers.indexOf(newspaperName) + 1;
+
+    let categoryName;
+
+    if(req.params.subject == "gundem") {
+        categoryName = "Gündem"
+    }
+
+    else if(req.params.subject == "ekonomi") {
+        categoryName = "Ekonomi"
+    }
+
+    else if(req.params.subject == "dunya") {
+        categoryName = "Dünya"
+    }
+
+    else if(req.params.subject == "spor") {
+        categoryName = "Spor"
+    }
+
+
+
     var subject = `kategori/${req.params.subject}`;
 
     if(req.params.subject == "hayat"){
@@ -162,17 +270,31 @@ else if (newspaper === "sozcu") {
         content = content.concat($(p).text().trim());
     });
 
+    var dateString = $('div.content-meta-dates span.content-meta-date').first().text();
+
+    var dateArray = dateString.substring(dateString.length - 13, dateString.length-1);
+    dateArray = dateArray.split(' ')
+
+    var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+    // dateArray[0] 15 (gun)
+    // dateArray[1] Ekim (ay AMA yazıyla)
+    // dateArray[2] 2022 (yil)
+    dateArray[1] = months.indexOf(dateArray[1]) + 1;
+    var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
     var newsObject = 
     {
         title: $('article').find('h1').first().text(),
         spot: $('h2.spot').text(),
-        date: $('div.content-meta-dates span.content-meta-date').first().text(),
+        date: finalDate,
         image: $('.img-holder').find('img').attr('src'),
-        content
+        content,
+        newspaperID,
+        categoryName
     }
 
-    nachrichten.nachrictArray.push(newsObject)
+    //nachrichten.nachrictArray.push(newsObject)
+    pushNewsToDb(newsObject)
 }))
 
 }
