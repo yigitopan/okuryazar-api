@@ -3,6 +3,12 @@ const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
 
 const newspapers = ["Sözcü", "Milliyet", "Sabah"]
+let report = {
+    alreadyexists:0,
+    added:0
+}
+let unChecked = [];
+
 
   const client = new Client({
     user: "cdxrgqfcgtvltf",
@@ -21,7 +27,7 @@ client.connect();
   
 
 const pushNewsToDb = async(newObj) => {
-    const search = newObj.title.replace("'","''")
+    const search = newObj.title.replaceAll("'","''")
     const check = `SELECT EXISTS (SELECT news_id FROM news WHERE title LIKE '${search}') AS it_does_exist; `
     const text = 'INSERT INTO news(title, spot, date, img_url, context, newspaper_id, category_name) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *'
 
@@ -39,12 +45,12 @@ const pushNewsToDb = async(newObj) => {
         const exists = await client.query(check)
         
         if(exists.rows[0].it_does_exist === true) {
-            console.log("already exists")
+            report.alreadyexists++;
         }
         else  {
             try {
                 const res = await client.query(text, values)
-                console.log("added")
+                report.added++;
             } 
             catch (err) {
                 console.log("error adding")
@@ -53,6 +59,7 @@ const pushNewsToDb = async(newObj) => {
         }
     } 
     catch (err) {
+        unChecked.push(search);
         console.log("error checking")
     }
 
@@ -61,7 +68,7 @@ const pushNewsToDb = async(newObj) => {
 
 
 const getAllNews = async(req, res, next) => { 
-    const text = 'SELECT * FROM public.news ORDER BY news_id ASC'
+    const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
     let news;
             try {
                 const res = await client.query(text)
@@ -80,7 +87,6 @@ const getContent = async(req, res, next) => {
     var nachrichten = {
         nachrictArray: []
     };
-
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
     if(newspaper === "milliyet"){
@@ -224,7 +230,6 @@ const getContent = async(req, res, next) => {
 else if (newspaper === "sozcu") { 
     const newspaperName = "Sözcü"
     const newspaperID = newspapers.indexOf(newspaperName) + 1;
-
     let categoryName;
 
     if(req.params.subject == "gundem") {
@@ -309,14 +314,15 @@ else if (newspaper === "sozcu") {
     }
 
     //nachrichten.nachrictArray.push(newsObject)
-    pushNewsToDb(newsObject)
+  pushNewsToDb(newsObject)
 }))
 
 }
+
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
-    res.status(200).json({data:nachrichten});
+    res.status(200).json({report:report, missedOnes:unChecked});
 }
 
 module.exports = {
     getContent, getAllNews
-}
+} 

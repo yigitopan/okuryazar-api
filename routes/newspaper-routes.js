@@ -1,10 +1,14 @@
 const express = require('express');
-const newspaperController = require('../controllers/newspaper-controller');
+const newspapersController = require('../controllers/news-controller');
+const articlesController = require('../controllers/articles-controller');
 const router = express.Router();
 
 //router.get('/:newspaper', newspaperController.getContent);
-router.get('/:newspaper/:subject', newspaperController.getContent);
 
-router.get('/getallnews', newspaperController.getAllNews);
+router.get('/:newspaper/articles', articlesController.getContent);
+router.get('/:newspaper/:subject', newspapersController.getContent);
+router.get('/getallnews', newspapersController.getAllNews);
+
+router.get('/getallarticles', articlesController.getAllArticles);
 
 module.exports = router;
