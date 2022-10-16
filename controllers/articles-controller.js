@@ -4,7 +4,7 @@ const { Pool, Client } = require("pg");
 
 const newspapers = ["Sözcü", "Milliyet", "Sabah"]
 
-let report = {
+var report = {
     alreadyexists:0,
     added:0
 }
@@ -28,8 +28,9 @@ const checkAuthor = async(articleObj) => {
 
     try {
         const authorExists = await client.query(checkAuthor)
+        const authorExistsResult = await authorExists.rows[0].author_exist
 
-        if(authorExists.rows[0].author_exist === false) {
+        if(authorExistsResult === false) {
             const text = 'INSERT INTO authors(author_name, img_url) VALUES($1, $2) RETURNING *'
 
             const values = [
@@ -40,7 +41,7 @@ const checkAuthor = async(articleObj) => {
             await pushArticlesToDb(articleObj)
         }
         else {
-            pushArticlesToDb(articleObj)
+            await pushArticlesToDb(articleObj)
         }
     } 
     catch (error) {
@@ -63,8 +64,10 @@ const pushArticlesToDb = async(articleObj) => {
 
     try {
         const exists = await client.query(check)
-        if(exists.rows[0].it_does_exist === true) {
-            report.alreadyexists++;
+        const existsResult = await exists.rows[0].it_does_exist
+        if(existsResult === true) {
+            report.alreadyexists =  report.alreadyexists + 1;
+            console.log("var bundan"+articleObj.title)
         }
 
         else  {
@@ -104,8 +107,8 @@ const getAllArticles = async(req, res, next) => {
 
 const getContent = async(req, res, next) => {
     console.log(req.params)
-    var nachrichten = {
-        nachrictArray: []
+    var articles = {
+        articleArray: []
     };
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
@@ -158,7 +161,7 @@ const getContent = async(req, res, next) => {
             }
             //pushNewsToDb(newsObject) 
             if(articleObject.content.length>10){
-                checkAuthor(articleObject)
+                articles.articleArray.push(articleObject)
             }
           }
         }))
@@ -284,7 +287,7 @@ else if (req.params.newspaper === "sozcu") {
             }
             //pushNewsToDb(newsObject) 
             if(articleObject.content.length>10){
-                checkAuthor(articleObject)
+                articles.articleArray.push(articleObject)
             }
           }
         }))
@@ -292,7 +295,13 @@ else if (req.params.newspaper === "sozcu") {
 }
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
-    res.status(200).json({data:'ok'});
+
+    await Promise.all(articles.articleArray.map(async article =>  {
+        await checkAuthor(article)
+    }))
+
+
+    res.status(200).json({data:report});
 }
 
 module.exports = {

@@ -3,7 +3,7 @@ const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
 
 const newspapers = ["Sözcü", "Milliyet", "Sabah"]
-let report = {
+var report = {
     alreadyexists:0,
     added:0
 }
@@ -43,9 +43,10 @@ const pushNewsToDb = async(newObj) => {
 
     try {
         const exists = await client.query(check)
-        
-        if(exists.rows[0].it_does_exist === true) {
-            report.alreadyexists++;
+        const existsResult = await exists.rows[0].it_does_exist
+        if(existsResult === true) {
+            report.alreadyexists = report.alreadyexists+1
+            console.log(newObj.title)
         }
         else  {
             try {
@@ -154,8 +155,8 @@ const getContent = async(req, res, next) => {
                 newspaperID,
                 categoryName
             }
-            pushNewsToDb(newsObject)
-            //nachrichten.nachrictArray.push(newsObject)
+            
+            nachrichten.nachrictArray.push(newsObject)
         }))
 
     }
@@ -313,13 +314,17 @@ else if (newspaper === "sozcu") {
         categoryName
     }
 
-    //nachrichten.nachrictArray.push(newsObject)
-  pushNewsToDb(newsObject)
+    nachrichten.nachrictArray.push(newsObject)
 }))
 
 }
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
+
+await Promise.all(nachrichten.nachrictArray.map(async news =>  {
+    await pushNewsToDb(news)
+}))
+
     res.status(200).json({report:report, missedOnes:unChecked});
 }
 
