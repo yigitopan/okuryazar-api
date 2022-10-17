@@ -48,7 +48,7 @@ const checkAuthor = async(articleObj) => {
         
     }
 }
- 
+
 const pushArticlesToDb = async(articleObj) => {
     const search = articleObj.title.replaceAll("'","''")
     const check = `SELECT EXISTS (SELECT article_id FROM articles WHERE title LIKE '${search}') AS it_does_exist; `
@@ -89,6 +89,15 @@ const pushArticlesToDb = async(articleObj) => {
 
 }
 
+/////////////////
+
+const searchForArticles = async(req, res, next) => {
+    const text = `SELECT article_id, title, author_name FROM articles WHERE LOWER(title) LIKE LOWER('%${req.params.query}%')`
+    const results = await client.query(text)
+    res.status(200).json(results.rows)
+}
+
+/////////////////
 
 const getAllArticles = async(req, res, next) => { 
     const text = 'SELECT * FROM public.articles ORDER BY article_id DESC'
@@ -101,9 +110,8 @@ const getAllArticles = async(req, res, next) => {
                 console.log("error adding")
             }
 
-            res.status(200).json({data:articles});
+            res.status(200).json(articles);
 }
-
 
 const getContent = async(req, res, next) => {
     console.log(req.params)
@@ -305,5 +313,5 @@ else if (req.params.newspaper === "sozcu") {
 }
 
 module.exports = {
-    getContent, getAllArticles
+    getContent, getAllArticles, searchForArticles
 } 

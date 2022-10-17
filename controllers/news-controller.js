@@ -26,6 +26,20 @@ client.connect();
   
   
 
+
+/*
+
+const searchForNews = async(req, res, next) => {
+    const text = `SELECT news_id, title, author_name FROM articles WHERE LOWER(title) LIKE LOWER('%${req.params.query}%')`
+    const results = await client.query(text)
+    console.log(results.rows)
+
+    res.status(200).json(results.rows)
+}
+
+*/
+
+
 const pushNewsToDb = async(newObj) => {
     const search = newObj.title.replaceAll("'","''")
     const check = `SELECT EXISTS (SELECT news_id FROM news WHERE title LIKE '${search}') AS it_does_exist; `
@@ -46,15 +60,16 @@ const pushNewsToDb = async(newObj) => {
         const existsResult = await exists.rows[0].it_does_exist
         if(existsResult === true) {
             report.alreadyexists = report.alreadyexists+1
-            console.log(newObj.title)
         }
+        
         else  {
             try {
                 const res = await client.query(text, values)
                 report.added++;
             } 
             catch (err) {
-                console.log("error adding")
+                console.log("error adding->"+err)
+                unChecked.push(newObj.title)
             }
 
         }
@@ -79,7 +94,7 @@ const getAllNews = async(req, res, next) => {
                 console.log("error adding")
             }
 
-            res.status(200).json({data:news});
+            res.status(200).json(news);
 }
 
 

@@ -3,12 +3,21 @@ const newspapersController = require('../controllers/news-controller');
 const articlesController = require('../controllers/articles-controller');
 const router = express.Router();
 
-//router.get('/:newspaper', newspaperController.getContent);
 
-router.get('/:newspaper/articles', articlesController.getContent);
-router.get('/:newspaper/:subject', newspapersController.getContent);
-router.get('/getallnews', newspapersController.getAllNews);
+// yazılacak router.get('/get/article/:articleid', articlesController.getArticleById);
 
-router.get('/getallarticles', articlesController.getAllArticles);
+
+//GetAll
+router.get('/get/news/all', newspapersController.getAllNews);
+router.get('/get/articles/all', articlesController.getAllArticles);
+
+//SearchQueries
+router.get('/search/articles/:query', articlesController.searchForArticles);
+
+
+// Die Endpoints unten werden nur an server-side ausgeführt, um die Datenbank zu aktualisieren.
+router.get('/push/:newspaper/articles', articlesController.getContent);
+router.get('/push/:newspaper/:subject', newspapersController.getContent);
+
 
 module.exports = router;
