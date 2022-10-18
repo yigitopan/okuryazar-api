@@ -1,10 +1,7 @@
 const fetch = require("isomorphic-fetch")
 const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
-const dotenv = require('dotenv');
-
-const resultenv = dotenv.config();
-
+require('dotenv').config();
 
 const newspapers = ["Sözcü", "Milliyet", "Sabah"]
 
