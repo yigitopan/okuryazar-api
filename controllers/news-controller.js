@@ -1,6 +1,7 @@
 const fetch = require("isomorphic-fetch")
 const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
+require('dotenv').config();
 
 const newspapers = ["Sözcü", "Milliyet", "Sabah"]
 var report = {
@@ -11,11 +12,11 @@ let unChecked = [];
 
 
   const client = new Client({
-    user: "cdxrgqfcgtvltf",
-    host: "ec2-54-228-30-162.eu-west-1.compute.amazonaws.com",
-    database: "d5ud7bjn2cgbk8",
-    password: "481266c06afa99716d093c1253d8333750c668b7e050d2f6fdcd179c3be09103",
-    port: 5432,
+    user: process.env.USER,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    password: process.env.DBPASS,
+    port: process.env.POSTGREPORT,
     ssl:{
         rejectUnauthorized:false
     }
