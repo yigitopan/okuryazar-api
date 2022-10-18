@@ -1,20 +1,25 @@
 const fetch = require("isomorphic-fetch")
 const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
+const dotenv = require('dotenv');
+
+const resultenv = dotenv.config();
+
 
 const newspapers = ["Sözcü", "Milliyet", "Sabah"]
 
 var report = {
     alreadyexists:0,
     added:0
-}
-let unChecked = [];
+}  
+let unChecked = []; 
+
 
   const client = new Client({
-    user: "cdxrgqfcgtvltf",
-    host: "ec2-54-228-30-162.eu-west-1.compute.amazonaws.com",
-    database: "d5ud7bjn2cgbk8",
-    password: "481266c06afa99716d093c1253d8333750c668b7e050d2f6fdcd179c3be09103",
+    user: resultenv.parsed.USER,
+    host: resultenv.parsed.HOST,
+    database: resultenv.parsed.DATABASE,
+    password: resultenv.parsed.DBPASS,
     port: 5432,
     ssl:{
         rejectUnauthorized:false
