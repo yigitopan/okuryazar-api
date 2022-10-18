@@ -16,11 +16,11 @@ let unChecked = [];
 
 
   const client = new Client({
-    user: resultenv.parsed.USER,
-    host: resultenv.parsed.HOST,
-    database: resultenv.parsed.DATABASE,
-    password: resultenv.parsed.DBPASS,
-    port: 5432,
+    user: resultenv.parsed.USER || process.env.USER,
+    host: resultenv.parsed.HOST || process.env.HOST,
+    database: resultenv.parsed.DATABASE || process.env.DATABASE,
+    password: resultenv.parsed.DBPASS || process.env.DBPASS,
+    port:resultenv.parsed.POSTGREPORT || process.env.POSTGREPORT,
     ssl:{
         rejectUnauthorized:false
     }
