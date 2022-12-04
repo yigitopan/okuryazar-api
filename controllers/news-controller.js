@@ -85,7 +85,7 @@ const pushNewsToDb = async(newObj) => {
 
 
 const getAllNews = async(req, res, next) => { 
-  /*  const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
+ const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
     let news;
             try {
                 const res = await client.query(text)
@@ -96,8 +96,6 @@ const getAllNews = async(req, res, next) => {
             }
 
             res.status(200).json(news);
-            */
-            res.status(200).json('test');
 }
 
 
@@ -173,7 +171,6 @@ const getContent = async(req, res, next) => {
                 newspaperID,
                 categoryName
             }
-            
             nachrichten.nachrictArray.push(newsObject)
         }))
 
@@ -310,10 +307,11 @@ else if (newspaper === "sozcu") {
     });
 
     var dateString = $('div.content-meta-dates span.content-meta-date').first().text();
-
-    var dateArray = dateString.substring(dateString.length - 13, dateString.length-1);
-    dateArray = dateArray.split(' ')
-
+        console.log('ds')
+        console.log(dateString)
+    var firstDateArray = dateString.split('- ')
+    var secondPart = firstDateArray[1];
+    var dateArray = secondPart.split(' ')
     var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
     // dateArray[0] 15 (gun)
     // dateArray[1] Ekim (ay AMA yazıyla)
@@ -331,7 +329,6 @@ else if (newspaper === "sozcu") {
         newspaperID,
         categoryName
     }
-
     nachrichten.nachrictArray.push(newsObject)
 }))
 

@@ -19,5 +19,10 @@ router.get('/search/articles/:query', articlesController.searchForArticles);
 router.get('/push/:newspaper/articles', articlesController.getContent);
 router.get('/push/:newspaper/:subject', newspapersController.getContent);
 
+//Test
+router.get('/get/dbtest', articlesController.getNewspapersTest);
+
+
+
 
 module.exports = router;

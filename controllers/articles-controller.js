@@ -100,6 +100,23 @@ const searchForArticles = async(req, res, next) => {
 
 /////////////////
 
+const getNewspapersTest = async(req, res, next) => { 
+    const text = 'SELECT * FROM newspapers'
+    let testResult;
+            try {
+                const res = await client.query(text)
+                testResult = res.rows;
+            } 
+            catch (err) {
+                console.log("error adding")
+            }
+
+            res.status(200).json(testResult);
+}
+
+
+////////
+
 const getAllArticles = async(req, res, next) => { 
     const text = 'SELECT * FROM public.articles ORDER BY article_id DESC'
     let articles;
@@ -168,7 +185,6 @@ const getContent = async(req, res, next) => {
                 newspaperID,
                 authorName:$('.card-heading__content-text-1 a').text()
             }
-            //pushNewsToDb(newsObject) 
             if(articleObject.content.length>10){
                 articles.articleArray.push(articleObject)
             }
@@ -263,7 +279,6 @@ else if (req.params.newspaper === "sozcu") {
 
         await Promise.all(articlesURL.map(async url =>  {
           if(url.includes('yazarlar')) {
-             
             const response = await fetch(
                 `${url}`
             );
@@ -314,5 +329,5 @@ else if (req.params.newspaper === "sozcu") {
 }
 
 module.exports = {
-    getContent, getAllArticles, searchForArticles
+    getContent, getAllArticles, searchForArticles, getNewspapersTest
 } 
