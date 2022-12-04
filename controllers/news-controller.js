@@ -85,7 +85,7 @@ const pushNewsToDb = async(newObj) => {
 
 
 const getAllNews = async(req, res, next) => { 
-    const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
+  /*  const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
     let news;
             try {
                 const res = await client.query(text)
@@ -96,6 +96,8 @@ const getAllNews = async(req, res, next) => {
             }
 
             res.status(200).json(news);
+            */
+            res.status(200).json('test');
 }
 
 
