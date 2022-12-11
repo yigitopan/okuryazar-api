@@ -3,7 +3,7 @@ const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
 require('dotenv').config();
 
-const newspapers = ["Sözcü", "Milliyet", "Sabah"]
+const newspapers = ["Sözcü", "Milliyet", "Takvim"]
 
 var report = {
     alreadyexists:0,
@@ -196,65 +196,58 @@ const getContent = async(req, res, next) => {
 
 
 //// --SABAH-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
-    else if (req.params.newspaper === "sabah") {
+    else if (req.params.newspaper === "takvim") {
+        const newspaperName = "Takvim"
+        const newspaperID = newspapers.indexOf(newspaperName) + 1;
 
-        const responseSubject = await fetch(
-            `https://www.sabah.com.tr/${req.params.subject}` //gundem-yasam-saglik-dünya
+        const responseArticlesPage = await fetch(
+            `https://www.takvim.com.tr/yazarlar/` //gundem-ekonomi-dünya div.card-listing a.card-listing__link
         );
 
-        const subjectText = await responseSubject.text();
-        var $ = cheerio.load(subjectText);
-        var nachrichtenURLS = [];
+        const articlesText = await responseArticlesPage.text();
+        var $ = cheerio.load(articlesText);
+        var articlesURL = [];
 
-        $('.headlineNumeric ul li a').each((i,a)=>{
-            nachrichtenURLS.push($(a).attr('href'))
+        $('li.writing a').each((i,a)=>{
+            articlesURL.push($(a).attr('href'))
         });
 
-        await Promise.all(nachrichtenURLS.map(async url =>  {
-                var fullUrl = `https://www.sabah.com.tr${url}`
 
-                if(url.includes('sabah.com.tr')){
-                    fullUrl = url;
-                }
+        await Promise.all(articlesURL.map(async url =>  {
+          if(url.includes('yazarlar')) {
+             
+            const response = await fetch(
+                `http://www.takvim.com.tr${url}`
+            );
+            const text = await response.text();
+            var $ = cheerio.load(text);
+            var content = ""
 
-                const response = await fetch(
-                    `${fullUrl}`
-                );
+            $('#haberDescription p').each((i,p)=>{
+                content = content.concat($(p).text().trim());
+            });
 
-                const text = await response.text(); 
-                var $ = cheerio.load(text);
-                var scripts = ""
-                var mainScript = ""
-                var content = ""
-                var spot = ""
+            var dateString =  $('div.info ul').first().find('li').text().trim().split(',')[0];
+            var dateArray = dateString.split(' ');
 
-                $('script').each((idx, script) => {
-                    scripts = scripts.concat($(script).text());
-                    if($(script).text().includes('NewsArticle')) {
-                        mainScript = $(script).text()
-                    }
-                });
+            var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+            dateArray[1] = months.indexOf(dateArray[1]) + 1;
+            var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
-                scripts =  scripts.split(`NewsArticle"`).pop().split(`keywords`)[0].trim(); // returns 'two'
-
-                content =  scripts.split(`articleBody`).pop().split(`description`)[0].trim();  // returns 'two'
-                spot =  scripts.split(`description`).pop().split(`articleBody`)[0].trim();  // returns 'two'
-
-                $('.newsBox.selectionShareable p').each((i ,p)=>{
-                    content = content.concat($(p).text());
-                });
-
-                var newsObject = 
-                {
-                    title: $('figure.newsImage img').attr('alt'),
-                    spot,
-                    date: $('.news-detail-info span span').first().text(),
-                    image: $('figure.newsImage').find('img').attr('src'),
-                    content
-                }
-                nachrichten.nachrictArray.push(newsObject)
+            var articleObject = 
+            {
+                title: $('#haberTitle').text(),
+                date: finalDate,
+                image: $('div.title img').attr('data-src'),
+                content,
+                newspaperID,
+                authorName:$('div.title span').first().text()
+            }
+            if(articleObject.content.length>10){
+               articles.articleArray.push(articleObject)
+            }
+          }
         }))
-
 }
 //// --SABAH-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SABAH-- ////
 

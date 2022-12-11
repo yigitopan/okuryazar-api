@@ -3,7 +3,7 @@ const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
 require('dotenv').config();
 
-const newspapers = ["Sözcü", "Milliyet", "Sabah"]
+const newspapers = ["Sözcü", "Milliyet", "Takvim"]
 var report = {
     alreadyexists:0,
     added:0
@@ -132,14 +132,11 @@ const getContent = async(req, res, next) => {
         var $ = cheerio.load(subjectText);
         var nachrichtenURLS = [];
 
-        $('a.category-card').each((i,a)=>{
+        $('a.cat-list-card__link').each((i,a)=>{
             nachrichtenURLS.push($(a).attr('href'))
         });
 
-
         await Promise.all(nachrichtenURLS.map(async url =>  {
-        
-
             const response = await fetch(
                 `http://www.milliyet.com.tr${url}`
             );
@@ -147,26 +144,18 @@ const getContent = async(req, res, next) => {
             var $ = cheerio.load(text);
             var content = ""
 
-            $('.nd-content-column p').each((i,p)=>{
+            $('.news-content.readingTime p').each((i,p)=>{
                 content = content.concat($(p).text().trim());
             });
-
-            var dateString =  $('.nd-article__info-block').first().contents().filter(function() {
-                return this.type === 'text';
-            }).text().substring(0,10)
-
-            var dateArray = dateString.split('.');
-            // dateArray[0] 15 (gun)
-            // dateArray[1] 10 (ay)
-            // dateArray[2] 2022 (yil)
-
-            var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
+            
+            var dateString =  $('.news-detail-text time').first().attr('datetime');
+            var finalDate = dateString.split('T')[0];
             var newsObject = 
             {
-                title: $('h1.nd-article__title').text(),
-                spot: $('h2.nd-article__spot').text(),
+                title: $('h1.news-detail-title').text(),
+                spot: $('.news-content__inf h2').first().text(),
                 date: finalDate,
-                image: $('.nd-article__spot-img').find('img').attr('data-src'),
+                image: $('.rhd-spot-img-cover').attr('src'),
                 content,
                 newspaperID,
                 categoryName
@@ -175,71 +164,132 @@ const getContent = async(req, res, next) => {
         }))
 
     }
-//// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
 
 
-//// --SABAH-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
-    else if (newspaper === "sabah") {
+//// --TAKVIM-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
+    else if (newspaper === "takvim") {
+        const newspaperName = "Takvim"
+        const newspaperID = newspapers.indexOf(newspaperName) + 1;
 
+        let categoryName;
+        let restUrl;
+
+        if(req.params.subject == "gundem") {
+            categoryName = "Gündem";
+        }
+
+        else if(req.params.subject == "ekonomi") {
+            categoryName = "Ekonomi"
+        }
+
+        else if(req.params.subject == "dunya") {
+            categoryName = "Dünya"
+        }
+
+        else if(req.params.subject == "spor") {
+            categoryName = "Spor"
+        }
+
+        if(req.params.subject == 'gundem') {
+            restUrl = 'guncel';
+        }
+        else {
+            restUrl = req.params.subject
+        }
+        
         const responseSubject = await fetch(
-            `https://www.sabah.com.tr/${req.params.subject}` //gundem-yasam-saglik-dünya
+            `https://www.takvim.com.tr/${restUrl}` //gundem-yasam-saglik-dünya
         );
 
         const subjectText = await responseSubject.text();
         var $ = cheerio.load(subjectText);
         var nachrichtenURLS = [];
 
-        $('.headlineNumeric ul li a').each((i,a)=>{
+        $('div.newsList ul li a').each((i,a)=>{
             nachrichtenURLS.push($(a).attr('href'))
         });
 
         await Promise.all(nachrichtenURLS.map(async url =>  {
-                var fullUrl = `https://www.sabah.com.tr${url}`
+            var finalUrl = `https://www.takvim.com.tr${url}`
 
-                if(url.includes('sabah.com.tr')){
-                    fullUrl = url;
-                }
+            if(url.includes('takvim.com.tr')){
+                finalUrl = url;
+            }
 
-                const response = await fetch(
-                    `${fullUrl}`
-                );
+            const response = await fetch(
+                `${finalUrl}`
+            );
 
-                const text = await response.text(); 
+            if(!(url.includes('/galeri/'))){
+                const text = await response.text();
                 var $ = cheerio.load(text);
-                var scripts = ""
-                var mainScript = ""
                 var content = ""
-                var spot = ""
 
-                $('script').each((idx, script) => {
-                    scripts = scripts.concat($(script).text());
-                    if($(script).text().includes('NewsArticle')) {
-                        mainScript = $(script).text()
-                    }
+                $('paginglist p').each((i,p)=>{
+                    content = content.concat($(p).text().trim());
                 });
 
-                scripts =  scripts.split(`NewsArticle"`).pop().split(`keywords`)[0].trim(); // returns 'two'
+                var dateString =  $('div.infoBox ul li:nth-child(2)').contents().filter(function() {
+                    return this.type === 'text';
+                }).text().split(' ')[0];
 
-                content =  scripts.split(`articleBody`).pop().split(`description`)[0].trim();  // returns 'two'
-                spot =  scripts.split(`description`).pop().split(`articleBody`)[0].trim();  // returns 'two'
-
-                $('.newsBox.selectionShareable p').each((i ,p)=>{
-                    content = content.concat($(p).text());
-                });
+                /* var dateArray = dateString.split('.');
+                // dateArray[0] 15 (gun)
+                // dateArray[1] 10 (ay)
+                // dateArray[2] 2022 (yil)
+                var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
+                */
+                var dateParts = dateString.split('.')
+                var finalDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` 
 
                 var newsObject = 
                 {
-                    title: $('figure.newsImage img').attr('alt'),
-                    spot,
-                    date: $('.news-detail-info span span').first().text(),
-                    image: $('figure.newsImage').find('img').attr('src'),
-                    content
+                    title: $('#haberTitle').text(),
+                    spot: $('#haberSpot').text(),
+                    date: dateString,
+                    image: $('.haberImg').attr('src'),
+                    content,
+                    newspaperID,
+                    categoryName
+                }
+                //nachrichten.nachrictArray.push(newsObject)
+            }
+            ///GALERIYSE
+            else {
+                const text = await response.text();
+                var $ = cheerio.load(text);
+                var content = ""
+
+                $('.itemsFrame p').each((i,p)=>{
+                    content = content.concat($(p).text().trim());
+                });
+
+                var dateString =  $('.textInfo span').text().trim().split(' ')[0];
+
+                /* var dateArray = dateString.split('.');
+                // dateArray[0] 15 (gun)
+                // dateArray[1] 10 (ay)
+                // dateArray[2] 2022 (yil)
+                var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
+                */
+                var dateParts = dateString.split('.')
+                var finalDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` 
+
+                var newsObject = 
+                {
+                    title: $('.pageTitle').text(),
+                    spot: $('h2.spot').text(),
+                    date: finalDate,
+                    image: $('.figure img.lazyload').first().attr('data-src'),
+                    content,
+                    newspaperID,
+                    categoryName
                 }
                 nachrichten.nachrictArray.push(newsObject)
+            }
         }))
 
 }
-//// --SABAH-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SABAH-- ////
 
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
@@ -307,8 +357,6 @@ else if (newspaper === "sozcu") {
     });
 
     var dateString = $('div.content-meta-dates span.content-meta-date').first().text();
-        console.log('ds')
-        console.log(dateString)
     var firstDateArray = dateString.split('- ')
     var secondPart = firstDateArray[1];
     var dateArray = secondPart.split(' ')
@@ -334,7 +382,6 @@ else if (newspaper === "sozcu") {
 
 }
 
-//// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
 
 await Promise.all(nachrichten.nachrictArray.map(async news =>  {
     await pushNewsToDb(news)
