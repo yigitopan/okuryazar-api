@@ -3,7 +3,7 @@ const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
 require('dotenv').config();
 
-const newspapers = ["Sözcü", "Milliyet", "Takvim"]
+const newspapers = ["Sözcü", "Milliyet", "Takvim", "Cumhuriyet"]
 
 var report = {
     alreadyexists:0,
@@ -192,10 +192,9 @@ const getContent = async(req, res, next) => {
         }))
 
     }
-//// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
 
 
-//// --SABAH-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
+//// --TAKVIM-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SABAH-- ////
     else if (req.params.newspaper === "takvim") {
         const newspaperName = "Takvim"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
@@ -248,70 +247,127 @@ const getContent = async(req, res, next) => {
             }
           }
         }))
-}
-//// --SABAH-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SABAH-- ////
+    }
 
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
-else if (req.params.newspaper === "sozcu") { 
-    const newspaperName = "Sözcü"
+    else if (req.params.newspaper === "sozcu") { 
+        const newspaperName = "Sözcü"
+            const newspaperID = newspapers.indexOf(newspaperName) + 1;
+
+            const responseArticlesPage = await fetch(
+                `https://www.sozcu.com.tr/kategori/yazarlar/`
+            );
+
+            const articlesText = await responseArticlesPage.text();
+            var $ = cheerio.load(articlesText);
+            var articlesURL = [];
+
+            $('a.columnist-card').each((i,a)=>{
+                articlesURL.push($(a).attr('href'))
+            });
+
+
+            await Promise.all(articlesURL.map(async url =>  {
+            if(url.includes('yazarlar')) {
+                const response = await fetch(
+                    `${url}`
+                );
+                const text = await response.text();
+                var $ = cheerio.load(text);
+                var content = ""
+
+                $('article p').each((i,p)=>{
+                    content = content.concat($(p).text().trim());
+                });
+
+                var dateString =  $('.content-meta-date').first().contents().filter(function() {
+                    return this.type === 'text';
+                }).text()
+
+                dateString = dateString.substring(1,dateString.length)
+                var dateArray = dateString.split(' ');
+                var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+                dateArray[1] = months.indexOf(dateArray[1]) + 1;
+                var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
+
+                var articleObject = 
+                {
+                    title: $('article h1').first().text(),
+                    date: finalDate,
+                    image: $('.columnist-header .img-holder img').first().attr('src'),
+                    content,
+                    newspaperID,
+                    authorName:$('article a.name').text()
+                }
+                //pushNewsToDb(newsObject) 
+                if(articleObject.content.length>10){
+                    articles.articleArray.push(articleObject)
+                }
+            }
+            }))
+
+    }
+
+//// --CUMHURIYET-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
+else if (req.params.newspaper === "cumhuriyet") { 
+    const newspaperName = "Cumhuriyet"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
 
         const responseArticlesPage = await fetch(
-            `https://www.sozcu.com.tr/kategori/yazarlar/`
+            `https://www.cumhuriyet.com.tr/BugununKoseleri`
         );
 
         const articlesText = await responseArticlesPage.text();
         var $ = cheerio.load(articlesText);
         var articlesURL = [];
 
-        $('a.columnist-card').each((i,a)=>{
+        $('.yazar-listesi > div a').each((i,a)=>{
             articlesURL.push($(a).attr('href'))
         });
 
 
         await Promise.all(articlesURL.map(async url =>  {
-          if(url.includes('yazarlar')) {
+        if(url.includes('yazarlar')) {
             const response = await fetch(
-                `${url}`
+                `https://www.cumhuriyet.com.tr${url}`
             );
             const text = await response.text();
             var $ = cheerio.load(text);
             var content = ""
 
-            $('article p').each((i,p)=>{
+            $('.haberMetni p').each((i,p)=>{
                 content = content.concat($(p).text().trim());
             });
 
-            var dateString =  $('.content-meta-date').first().contents().filter(function() {
-                return this.type === 'text';
-            }).text()
-
-            dateString = dateString.substring(1,dateString.length)
-            var dateArray = dateString.split(' ');
+            var dateArray = $('.yayin-tarihi').text().trim().split(' ')
+            
             var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
-            dateArray[1] = months.indexOf(dateArray[1]) + 1;
-            var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
+            // dateArray[0] 15 (gun)
+            // dateArray[1] Ekim (ay AMA yazıyla)
+            // dateArray[2] 2022 (yil)
+            var dateMonth = months.indexOf(dateArray[1]) + 1;
+            var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
 
             var articleObject = 
             {
-                title: $('article h1').first().text(),
+                title: $('h1.baslik').first().text(),
                 date: finalDate,
-                image: $('.columnist-header .img-holder img').first().attr('src'),
+                image: `https://www.cumhuriyet.com.tr${$('.kose-yazisi-ust .bilgiler img').attr('src')}`,
                 content,
                 newspaperID,
-                authorName:$('article a.name').text()
+                authorName:$('.kose-yazisi-ust .adi').text()
             }
             //pushNewsToDb(newsObject) 
+            console.log(articleObject)
             if(articleObject.content.length>10){
                 articles.articleArray.push(articleObject)
             }
-          }
+        }
         }))
 
 }
 
-//// --SOZCU-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
 
     await Promise.all(articles.articleArray.map(async article =>  {
         await checkAuthor(article)

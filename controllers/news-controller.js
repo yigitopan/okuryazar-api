@@ -3,7 +3,7 @@ const cheerio = require("cheerio")
 const { Pool, Client } = require("pg");
 require('dotenv').config();
 
-const newspapers = ["Sözcü", "Milliyet", "Takvim"]
+const newspapers = ["Sözcü", "Milliyet", "Takvim", "Cumhuriyet"]
 var report = {
     alreadyexists:0,
     added:0
@@ -289,98 +289,171 @@ const getContent = async(req, res, next) => {
             }
         }))
 
-}
+    }
 
 
 //// --SOZCU-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
-else if (newspaper === "sozcu") { 
-    const newspaperName = "Sözcü"
-    const newspaperID = newspapers.indexOf(newspaperName) + 1;
-    let categoryName;
+    else if (newspaper === "sozcu") { 
+        const newspaperName = "Sözcü"
+        const newspaperID = newspapers.indexOf(newspaperName) + 1;
+        let categoryName;
 
-    if(req.params.subject == "gundem") {
-        categoryName = "Gündem"
+        if(req.params.subject == "gundem") {
+            categoryName = "Gündem"
+        }
+
+        else if(req.params.subject == "ekonomi") {
+            categoryName = "Ekonomi"
+        }
+
+        else if(req.params.subject == "dunya") {
+            categoryName = "Dünya"
+        }
+
+        else if(req.params.subject == "spor") {
+            categoryName = "Spor"
+        }
+
+
+
+        var subject = `kategori/${req.params.subject}`;
+
+        if(req.params.subject == "hayat"){
+            subject = `hayatim`;
+        }
+
+        else if(req.params.subject == "spor"){
+            subject = `spor`;
+        }
+
+        else if(req.params.subject == "finans"){
+            subject = `finans`;
+        }
+
+        const responseSubject = await fetch(
+            `https://www.sozcu.com.tr/${subject}` //gundem-spor-hayat-dünya-ekonomi- otomotiv
+        );
+
+        const subjectText = await responseSubject.text();
+        var $ = cheerio.load(subjectText);
+        var nachrichtenURLS = [];
+
+        $('div.news-item a.img-holder').each((i,a)=>{
+            nachrichtenURLS.push($(a).attr('href'))
+        });
+
+        await Promise.all(nachrichtenURLS.map(async url =>  {
+        const response = await fetch(
+            `${url}`
+        );
+
+        const text = await response.text();
+        var $ = cheerio.load(text);
+
+        var content = ""
+
+        $('article p').each((i,p)=>{
+            content = content.concat($(p).text().trim());
+        });
+
+        var dateString = $('div.content-meta-dates span.content-meta-date').first().text();
+        var firstDateArray = dateString.split('- ')
+        var secondPart = firstDateArray[1];
+        var dateArray = secondPart.split(' ')
+        var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+        // dateArray[0] 15 (gun)
+        // dateArray[1] Ekim (ay AMA yazıyla)
+        // dateArray[2] 2022 (yil)
+        dateArray[1] = months.indexOf(dateArray[1]) + 1;
+        var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
+
+        var newsObject = 
+        {
+            title: $('article').find('h1').first().text(),
+            spot: $('h2.spot').text(),
+            date: finalDate,
+            image: $('.main-img .img-holder').find('img').attr('src'),
+            content,
+            newspaperID,
+            categoryName
+        }
+        nachrichten.nachrictArray.push(newsObject)
+    }))
+
     }
 
-    else if(req.params.subject == "ekonomi") {
-        categoryName = "Ekonomi"
+
+//// --TAKVIM-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
+    else if (newspaper === "cumhuriyet") { 
+        const newspaperName = "Cumhuriyet"
+        const newspaperID = newspapers.indexOf(newspaperName) + 1;
+        let categoryName;
+
+        if(req.params.subject == "gundem") {
+            categoryName = "Gündem"
+        }
+
+        else if(req.params.subject == "ekonomi") {
+            categoryName = "Ekonomi"
+        }
+
+        else if(req.params.subject == "dunya") {
+            categoryName = "Dünya"
+        }
+
+        else if(req.params.subject == "spor") {
+            categoryName = "Spor"
+        }
+
+        const responseSubject = await fetch(
+            `https://www.cumhuriyet.com.tr/${req.params.subject}` //gundem-spor-hayat-dünya-ekonomi- otomotiv
+        );
+
+        const subjectText = await responseSubject.text();
+        var $ = cheerio.load(subjectText);
+        var nachrichtenURLS = [];
+
+        $('.swiper-slide a:nth-child(1)').each((i,a)=>{
+            nachrichtenURLS.push($(a).attr('href'))
+        });
+
+        await Promise.all(nachrichtenURLS.map(async url =>  {
+            const response = await fetch(
+                `https://www.cumhuriyet.com.tr${url}`
+            );
+
+            const text = await response.text();
+            var $ = cheerio.load(text);
+
+            var content = ""
+
+            $('.haberMetni  p').each((i,p)=>{
+                content = content.concat($(p).text().trim());
+            });
+
+            var dateArray = $('.yayin-tarihi').text().trim().split(' ')
+            
+            var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+            // dateArray[0] 15 (gun)
+            // dateArray[1] Ekim (ay AMA yazıyla)
+            // dateArray[2] 2022 (yil)
+            var dateMonth = months.indexOf(dateArray[1]) + 1;
+            var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
+
+            var newsObject = 
+            {
+                title: $('h1.baslik').text(),
+                spot: $('h2.spot').text(),
+                date: finalDate,
+                image: `https://www.cumhuriyet.com.tr${$('.content .img-responsive').attr('src')}`,
+                content,
+                newspaperID,
+                categoryName
+            }
+            nachrichten.nachrictArray.push(newsObject)
+        }))
+
     }
-
-    else if(req.params.subject == "dunya") {
-        categoryName = "Dünya"
-    }
-
-    else if(req.params.subject == "spor") {
-        categoryName = "Spor"
-    }
-
-
-
-    var subject = `kategori/${req.params.subject}`;
-
-    if(req.params.subject == "hayat"){
-        subject = `hayatim`;
-    }
-
-    else if(req.params.subject == "spor"){
-        subject = `spor`;
-    }
-
-    else if(req.params.subject == "finans"){
-        subject = `finans`;
-    }
-
-    const responseSubject = await fetch(
-        `https://www.sozcu.com.tr/${subject}` //gundem-spor-hayat-dünya-ekonomi- otomotiv
-    );
-
-    const subjectText = await responseSubject.text();
-    var $ = cheerio.load(subjectText);
-    var nachrichtenURLS = [];
-
-    $('div.news-item a.img-holder').each((i,a)=>{
-        nachrichtenURLS.push($(a).attr('href'))
-    });
-
-    await Promise.all(nachrichtenURLS.map(async url =>  {
-    const response = await fetch(
-        `${url}`
-    );
-
-    const text = await response.text();
-    var $ = cheerio.load(text);
-
-    var content = ""
-
-    $('article p').each((i,p)=>{
-        content = content.concat($(p).text().trim());
-    });
-
-    var dateString = $('div.content-meta-dates span.content-meta-date').first().text();
-    var firstDateArray = dateString.split('- ')
-    var secondPart = firstDateArray[1];
-    var dateArray = secondPart.split(' ')
-    var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
-    // dateArray[0] 15 (gun)
-    // dateArray[1] Ekim (ay AMA yazıyla)
-    // dateArray[2] 2022 (yil)
-    dateArray[1] = months.indexOf(dateArray[1]) + 1;
-    var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
-
-    var newsObject = 
-    {
-        title: $('article').find('h1').first().text(),
-        spot: $('h2.spot').text(),
-        date: finalDate,
-        image: $('.main-img .img-holder').find('img').attr('src'),
-        content,
-        newspaperID,
-        categoryName
-    }
-    nachrichten.nachrictArray.push(newsObject)
-}))
-
-}
 
 
 await Promise.all(nachrichten.nachrictArray.map(async news =>  {
