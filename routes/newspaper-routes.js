@@ -1,6 +1,7 @@
 const express = require('express');
 const newspapersController = require('../controllers/news-controller');
 const articlesController = require('../controllers/articles-controller');
+const searchController = require('../controllers/search-controller');
 const router = express.Router();
 
 
@@ -12,7 +13,7 @@ router.get('/get/news/all', newspapersController.getAllNews);
 router.get('/get/articles/all', articlesController.getAllArticles);
 
 //SearchQueries
-router.get('/search/articles/:query', articlesController.searchForArticles);
+router.post('/search', searchController.searchOkuryazar);
 
 
 // Die Endpoints unten werden nur an server-side ausgeführt, um die Datenbank zu aktualisieren.
