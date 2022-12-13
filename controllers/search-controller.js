@@ -22,8 +22,10 @@ client.connect();
 /////////////////
 
 const searchOkuryazar = async(req, res, next) => {
-    const text = `SELECT * FROM articles WHERE LOWER(title) LIKE LOWER('%${req.body.searchQuery}%') OR LOWER(context) LIKE LOWER('%${req.body.searchQuery}%') OR LOWER(author_name) LIKE LOWER('%${req.body.searchQuery}%')`
+    const query = req.params.query.replace("+", " ");
+    const text = `SELECT * FROM news WHERE LOWER(title) LIKE LOWER('%${query}%') OR LOWER(context) LIKE LOWER('%${query}%') OR LOWER(spot) LIKE LOWER('%${query}%')`
     const results = await client.query(text)
+    console.log(query)
     res.status(200).json(results.rows)
 }
 

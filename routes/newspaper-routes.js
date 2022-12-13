@@ -13,7 +13,7 @@ router.get('/get/news/all', newspapersController.getAllNews);
 router.get('/get/articles/all', articlesController.getAllArticles);
 
 //SearchQueries
-router.post('/search', searchController.searchOkuryazar);
+router.get('/search/:query', searchController.searchOkuryazar);
 
 
 // Die Endpoints unten werden nur an server-side ausgeführt, um die Datenbank zu aktualisieren.
