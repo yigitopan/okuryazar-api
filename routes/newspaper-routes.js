@@ -4,6 +4,9 @@ const articlesController = require('../controllers/articles-controller');
 const searchController = require('../controllers/search-controller');
 const router = express.Router();
 
+const quatsch = require('../controllers/nonproject-stuff.js');
+
+
 
 // yazılacak router.get('/get/article/:articleid', articlesController.getArticleById);
 
@@ -22,6 +25,8 @@ router.get('/push/:newspaper/:subject', newspapersController.getContent);
 
 //Test
 router.get('/get/dbtest', articlesController.getNewspapersTest);
+
+router.get('/get/mail', quatsch.MindSetEmail);
 
 
 
