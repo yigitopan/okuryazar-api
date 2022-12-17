@@ -9,7 +9,7 @@ const MindSetEmail = async(req, res, next) => {
         service:'Hotmail',
         auth: {
             user: 'yigitopan@hotmail.com',
-            pass: process.env.MAILPASS
+            pass: '24y!35aN99',
         }
     })
 
