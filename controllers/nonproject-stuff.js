@@ -8,18 +8,18 @@ const MindSetEmail = async(req, res, next) => {
     let transporter = nodemailer.createTransport({
         service:'Hotmail',
         auth: {
-            user: 'yigitopan@hotmail.com',
-            pass: '24y!35aN99',
+            user: 'e180503041@stud.tau.edu.tr',
+            pass: process.env.MAILPASS
         }
     })
 
     var maillist = [
-        'e180503017@stud.tau.edu.tr',
-        'e180503041@stud.tau.edu.tr'
+        'yigitmert35@gmail.com',
+        'yigitopan@hotmail.com'
       ];
 
     let mailOptions = {
-        from: 'yigitopan@hotmail.com',
+        from: 'e180503041@stud.tau.edu.tr',
         to: maillist,
         subject: 'Taupay - Hoşgeldin',
         html: '<h1>Taupay beta sürümü üyesisin!</h1> <p>Hizmetlerimiz çok yakında genişlemeye başlayacak. Takipte kal :)</p>',
