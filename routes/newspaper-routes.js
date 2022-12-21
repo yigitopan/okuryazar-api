@@ -6,11 +6,6 @@ const router = express.Router();
 
 const quatsch = require('../controllers/nonproject-stuff.js');
 
-
-
-
-
-//GetAll
 router.get('/get/news/all', newspapersController.getAllNews);
 router.get('/get/articles/all', articlesController.getAllArticles);
 
