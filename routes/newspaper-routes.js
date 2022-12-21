@@ -14,4 +14,6 @@ router.get('/push/:newspaper/:subject', newspapersController.getContent);
 router.get('/get/dbtest', articlesController.getNewspapersTest);
 router.get('/get/mail', quatsch.MindSetEmail);
 
+// test 
+
 module.exports = router;
