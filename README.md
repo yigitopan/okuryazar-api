@@ -1,4 +1,4 @@
-An API designed to be used in a potential bundle application, which stores news and columns in Turkish newspapers in SQL database.
+An API designed to be used in a potential bundle application, which stores news and columns in Turkish newspapers in SQL database. <br>
 Currently supported newspapers: Cumhuriyet, Calendar, Sözcü, Milliyet
  
  Structure:
