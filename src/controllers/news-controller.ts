@@ -1,47 +1,19 @@
-const fetch = require("isomorphic-fetch")
-const cheerio = require("cheerio")
-const { Pool, Client } = require("pg");
-require('dotenv').config();
+import { RequestHandler } from "express";
+import { clientPG } from "../db";
+import fetch from "isomorphic-fetch";
+import cheerio from "cheerio";
+import { News } from "../models/news";
 
 const newspapers = ["Sözcü", "Milliyet", "Takvim", "Cumhuriyet"]
 var report = {
     alreadyexists:0,
     added:0
 }
-let unChecked = [];
+let unChecked: string[] = [];
 
 
-  const client = new Client({
-    user: process.env.USER,
-    host: process.env.HOST,
-    database: process.env.DATABASE,
-    password: process.env.DBPASS,
-    port: process.env.POSTGREPORT,
-    ssl:{
-        rejectUnauthorized:false
-    }
-});
 
-
-client.connect();
-  
-  
-
-
-/*
-
-const searchForNews = async(req, res, next) => {
-    const text = `SELECT news_id, title, author_name FROM articles WHERE LOWER(title) LIKE LOWER('%${req.params.query}%')`
-    const results = await client.query(text)
-    console.log(results.rows)
-
-    res.status(200).json(results.rows)
-}
-
-*/
-
-
-const pushNewsToDb = async(newObj) => {
+const pushNewsToDb = async(newObj: News) => {
     const search = newObj.title.replaceAll("'","''")
     const check = `SELECT EXISTS (SELECT news_id FROM news WHERE title LIKE '${search}') AS it_does_exist; `
     const text = 'INSERT INTO news(title, spot, date, img_url, context, newspaper_id, category_name) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *'
@@ -57,7 +29,7 @@ const pushNewsToDb = async(newObj) => {
     ] 
 
     try {
-        const exists = await client.query(check)
+        const exists = await clientPG.query(check)
         const existsResult = await exists.rows[0].it_does_exist
         if(existsResult === true) {
             report.alreadyexists = report.alreadyexists+1
@@ -65,7 +37,7 @@ const pushNewsToDb = async(newObj) => {
         
         else  {
             try {
-                const res = await client.query(text, values)
+                const res = await clientPG.query(text, values)
                 report.added++;
             } 
             catch (err) {
@@ -79,16 +51,13 @@ const pushNewsToDb = async(newObj) => {
         unChecked.push(search);
         console.log("error checking")
     }
-
-   
 }
 
-
-const getAllNews = async(req, res, next) => { 
+export const getAllNews:RequestHandler = async(req, res, next) => { 
  const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
     let news;
             try {
-                const res = await client.query(text)
+                const res = await clientPG.query(text)
                 news = res.rows;
             } 
             catch (err) {
@@ -99,18 +68,16 @@ const getAllNews = async(req, res, next) => {
 }
 
 
-const getContent = async(req, res, next) => {
+export const scrapNews:RequestHandler = async(req, res, next) => {
     const newspaper = req.params.newspaper
-    var nachrichten = {
-        nachrictArray: []
-    };
+        let nachrictArray: News[] = [];
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
     if(newspaper === "milliyet"){
         const newspaperName = "Milliyet"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
 
-        let categoryName;
+        let categoryName: string;
 
         if(req.params.subject == "gundem") {
             categoryName = "Gündem"
@@ -130,7 +97,7 @@ const getContent = async(req, res, next) => {
 
         const subjectText = await responseSubject.text();
         var $ = cheerio.load(subjectText);
-        var nachrichtenURLS = [];
+        var nachrichtenURLS: (string | undefined)[] = [];
 
         $('a.cat-list-card__link').each((i,a)=>{
             nachrichtenURLS.push($(a).attr('href'))
@@ -149,18 +116,16 @@ const getContent = async(req, res, next) => {
             });
             
             var dateString =  $('.news-detail-text time').first().attr('datetime');
-            var finalDate = dateString.split('T')[0];
-            var newsObject = 
-            {
-                title: $('h1.news-detail-title').text(),
-                spot: $('.news-content__inf h2').first().text(),
-                date: finalDate,
-                image: $('.rhd-spot-img-cover').attr('src'),
-                content,
-                newspaperID,
-                categoryName
-            }
-            nachrichten.nachrictArray.push(newsObject)
+            var finalDate = dateString!.split('T')[0];
+
+            const spot = $('.news-content__inf h2').first().text();
+            const title = $('h1.news-detail-title').text();
+            const date = finalDate;
+            const image = $('.rhd-spot-img-cover').attr('src');
+
+            const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
+
+            nachrictArray.push(newsObject)
         }))
 
     }
@@ -171,7 +136,7 @@ const getContent = async(req, res, next) => {
         const newspaperName = "Takvim"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
 
-        let categoryName;
+        let categoryName: string;
         let restUrl;
 
         if(req.params.subject == "gundem") {
@@ -203,10 +168,10 @@ const getContent = async(req, res, next) => {
 
         const subjectText = await responseSubject.text();
         var $ = cheerio.load(subjectText);
-        var nachrichtenURLS = [];
+        let nachrichtenURLS: (string)[] = [];
 
         $('div.newsList ul li a').each((i,a)=>{
-            nachrichtenURLS.push($(a).attr('href'))
+            nachrichtenURLS.push($(a).attr('href')!)
         });
 
         await Promise.all(nachrichtenURLS.map(async url =>  {
@@ -242,16 +207,13 @@ const getContent = async(req, res, next) => {
                 var dateParts = dateString.split('.')
                 var finalDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` 
 
-                var newsObject = 
-                {
-                    title: $('#haberTitle').text(),
-                    spot: $('#haberSpot').text(),
-                    date: dateString,
-                    image: $('.haberImg').attr('src'),
-                    content,
-                    newspaperID,
-                    categoryName
-                }
+                const title = $('#haberTitle').text();
+                const spot = $('#haberSpot').text();
+                const date = dateString;
+                const image = $('.haberImg').attr('src');
+                
+                const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
+                nachrictArray.push(newsObject)
                 //nachrichten.nachrictArray.push(newsObject)
             }
             ///GALERIYSE
@@ -275,17 +237,13 @@ const getContent = async(req, res, next) => {
                 var dateParts = dateString.split('.')
                 var finalDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` 
 
-                var newsObject = 
-                {
-                    title: $('.pageTitle').text(),
-                    spot: $('h2.spot').text(),
-                    date: finalDate,
-                    image: $('.figure img.lazyload').first().attr('data-src'),
-                    content,
-                    newspaperID,
-                    categoryName
-                }
-                nachrichten.nachrictArray.push(newsObject)
+                const title =  $('.pageTitle').text();
+                const spot = $('h2.spot').text();
+                const date = finalDate;
+                const image =  $('.figure img.lazyload').first().attr('data-src');
+
+                const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
+                nachrictArray.push(newsObject)
             }
         }))
 
@@ -296,7 +254,7 @@ const getContent = async(req, res, next) => {
     else if (newspaper === "sozcu") { 
         const newspaperName = "Sözcü"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
-        let categoryName;
+        let categoryName: string;
 
         if(req.params.subject == "gundem") {
             categoryName = "Gündem"
@@ -336,10 +294,10 @@ const getContent = async(req, res, next) => {
 
         const subjectText = await responseSubject.text();
         var $ = cheerio.load(subjectText);
-        var nachrichtenURLS = [];
+        let nachrichtenURLS: (string)[] = [];
 
         $('div.news-item a.img-holder').each((i,a)=>{
-            nachrichtenURLS.push($(a).attr('href'))
+            nachrichtenURLS.push($(a).attr('href')!)
         });
 
         await Promise.all(nachrichtenURLS.map(async url =>  {
@@ -364,20 +322,16 @@ const getContent = async(req, res, next) => {
         // dateArray[0] 15 (gun)
         // dateArray[1] Ekim (ay AMA yazıyla)
         // dateArray[2] 2022 (yil)
-        dateArray[1] = months.indexOf(dateArray[1]) + 1;
+        dateArray[1] = (months.indexOf(dateArray[1]) + 1).toString();
         var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
-        var newsObject = 
-        {
-            title: $('article').find('h1').first().text(),
-            spot: $('h2.spot').text(),
-            date: finalDate,
-            image: $('.main-img .img-holder').find('img').attr('src'),
-            content,
-            newspaperID,
-            categoryName
-        }
-        nachrichten.nachrictArray.push(newsObject)
+        const title =  $('article').find('h1').first().text();
+        const spot = $('h2.spot').text();
+        const date = finalDate;
+        const image =  $('.main-img .img-holder').find('img').attr('src');
+
+        const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
+        nachrictArray.push(newsObject)
     }))
 
     }
@@ -387,7 +341,7 @@ const getContent = async(req, res, next) => {
     else if (newspaper === "cumhuriyet") { 
         const newspaperName = "Cumhuriyet"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
-        let categoryName;
+        let categoryName: string;
 
         if(req.params.subject == "gundem") {
             categoryName = "Gündem"
@@ -411,10 +365,10 @@ const getContent = async(req, res, next) => {
 
         const subjectText = await responseSubject.text();
         var $ = cheerio.load(subjectText);
-        var nachrichtenURLS = [];
+        let nachrichtenURLS: (string)[] = [];
 
         $('.swiper-slide a:nth-child(1)').each((i,a)=>{
-            nachrichtenURLS.push($(a).attr('href'))
+            nachrichtenURLS.push($(a).attr('href')!)
         });
 
         await Promise.all(nachrichtenURLS.map(async url =>  {
@@ -440,29 +394,22 @@ const getContent = async(req, res, next) => {
             var dateMonth = months.indexOf(dateArray[1]) + 1;
             var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
 
-            var newsObject = 
-            {
-                title: $('h1.baslik').text(),
-                spot: $('h2.spot').text(),
-                date: finalDate,
-                image: `https://www.cumhuriyet.com.tr${$('.content .img-responsive').attr('src')}`,
-                content,
-                newspaperID,
-                categoryName
-            }
-            nachrichten.nachrictArray.push(newsObject)
+            const title =  $('h1.baslik').text();
+            const spot = $('h2.spot').text();
+            const date = finalDate;
+            const image = `https://www.cumhuriyet.com.tr${$('.content .img-responsive').attr('src')}`;
+
+
+            const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
+            nachrictArray.push(newsObject)
         }))
 
     }
 
 
-await Promise.all(nachrichten.nachrictArray.map(async news =>  {
+await Promise.all(nachrictArray.map(async news =>  {
     await pushNewsToDb(news)
 }))
 
     res.status(200).json({report:report, missedOnes:unChecked});
 }
-
-module.exports = {
-    getContent, getAllNews
-} 

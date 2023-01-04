@@ -1,7 +1,8 @@
-const fetch = require("isomorphic-fetch")
-const cheerio = require("cheerio")
-const { Pool, Client } = require("pg");
-require('dotenv').config();
+import { RequestHandler } from "express";
+import { clientPG } from "../db";
+import fetch from "isomorphic-fetch";
+import cheerio from "cheerio";
+import { Article } from "../models/article";
 
 const newspapers = ["Sözcü", "Milliyet", "Takvim", "Cumhuriyet"]
 
@@ -9,26 +10,12 @@ var report = {
     alreadyexists:0,
     added:0
 }  
-let unChecked = []; 
 
-  const client = new Client({
-    user: process.env.USER,
-    host: process.env.HOST,
-    database: process.env.DATABASE,
-    password: process.env.DBPASS,
-    port: process.env.POSTGREPORT,
-    ssl:{
-        rejectUnauthorized:false
-    }
-});
-
-client.connect();
-
-const checkAuthor = async(articleObj) => {
+const checkAuthor = async(articleObj: Article) => {
     const checkAuthor = `SELECT EXISTS (SELECT author_name FROM authors WHERE author_name LIKE '${articleObj.authorName}') AS author_exist; `
 
     try {
-        const authorExists = await client.query(checkAuthor)
+        const authorExists = await clientPG.query(checkAuthor)
         const authorExistsResult = await authorExists.rows[0].author_exist
 
         if(authorExistsResult === false) {
@@ -38,19 +25,20 @@ const checkAuthor = async(articleObj) => {
                 articleObj.authorName,
                 articleObj.image
             ] 
-            const res = await client.query(text, values)
+            const res = await clientPG.query(text, values)
             await pushArticlesToDb(articleObj)
+            
         }
         else {
             await pushArticlesToDb(articleObj)
         }
     } 
     catch (error) {
-        
+        console.log(error);
     }
 }
 
-const pushArticlesToDb = async(articleObj) => {
+const pushArticlesToDb = async(articleObj: Article) => {
     const search = articleObj.title.replaceAll("'","''")
     const check = `SELECT EXISTS (SELECT article_id FROM articles WHERE title LIKE '${search}') AS it_does_exist; `
     const text = 'INSERT INTO articles(title, date, context, newspaper_id, author_name) VALUES($1, $2, $3, $4, $5) RETURNING *'
@@ -64,7 +52,7 @@ const pushArticlesToDb = async(articleObj) => {
     ] 
 
     try {
-        const exists = await client.query(check)
+        const exists = await clientPG.query(check)
         const existsResult = await exists.rows[0].it_does_exist
         if(existsResult === true) {
             report.alreadyexists =  report.alreadyexists + 1;
@@ -73,7 +61,7 @@ const pushArticlesToDb = async(articleObj) => {
 
         else  {
             try {
-                const res = await client.query(text, values)
+                const res = await clientPG.query(text, values)
                 report.added++;
             } 
             catch (err) {
@@ -92,36 +80,19 @@ const pushArticlesToDb = async(articleObj) => {
 
 /////////////////
 
-const searchForArticles = async(req, res, next) => {
+export const searchForArticles:RequestHandler = async(req, res, next) => {
     const text = `SELECT article_id, title, author_name FROM articles WHERE LOWER(title) LIKE LOWER('%${req.params.query}%')`
-    const results = await client.query(text)
+    const results = await clientPG.query(text)
     res.status(200).json(results.rows)
 }
 
 /////////////////
 
-const getNewspapersTest = async(req, res, next) => { 
-    const text = 'SELECT * FROM newspapers'
-    let testResult;
-            try {
-                const res = await client.query(text)
-                testResult = res.rows;
-            } 
-            catch (err) {
-                console.log("error adding")
-            }
-
-            res.status(200).json(testResult);
-}
-
-
-////////
-
-const getAllArticles = async(req, res, next) => { 
+export const getAllArticles:RequestHandler = async(req, res, next) => { 
     const text = 'SELECT * FROM public.articles ORDER BY article_id DESC'
     let articles;
             try {
-                const res = await client.query(text)
+                const res = await clientPG.query(text)
                 articles = res.rows;
             } 
             catch (err) {
@@ -131,11 +102,8 @@ const getAllArticles = async(req, res, next) => {
             res.status(200).json(articles);
 }
 
-const getContent = async(req, res, next) => {
-    console.log(req.params)
-    var articles = {
-        articleArray: []
-    };
+export const scrapArticles:RequestHandler = async(req, res, next) => {
+       let articleArray: Article[] = [];
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
     if(req.params.newspaper === "milliyet"){
@@ -148,10 +116,10 @@ const getContent = async(req, res, next) => {
 
         const articlesText = await responseArticlesPage.text();
         var $ = cheerio.load(articlesText);
-        var articlesURL = [];
+        var articlesURL: String[] = [];
 
         $('div.card-listing a.card-listing__link').each((i,a)=>{
-            articlesURL.push($(a).attr('href'))
+            articlesURL.push($(a).attr('href')!)
         });
 
 
@@ -163,7 +131,7 @@ const getContent = async(req, res, next) => {
             );
             const text = await response.text();
             var $ = cheerio.load(text);
-            var content = ""
+            let content = ""
 
             $('.article__content p').each((i,p)=>{
                 content = content.concat($(p).text().trim());
@@ -173,20 +141,19 @@ const getContent = async(req, res, next) => {
             var dateArray = dateString.split(' ');
 
             var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
-            dateArray[1] = months.indexOf(dateArray[1]) + 1;
+            dateArray[1] = (months.indexOf(dateArray[1]) + 1).toString();
             var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
-            var articleObject = 
-            {
-                title: $('.article__title').text(),
-                date: finalDate,
-                image: $('.card-heading__figure-img').first().attr('src'),
-                content,
-                newspaperID,
-                authorName:$('.card-heading__content-text-1 a').text()
-            }
+            const title = $('.article__title').text();
+            const date = finalDate;
+            const image = $('.card-heading__figure-img').first().attr('src')!;
+            const authorName =$('.card-heading__content-text-1 a').text();
+
+            const articleObject = new Article(title, date, image, content, newspaperID, authorName)
+
+                
             if(articleObject.content.length>10){
-                articles.articleArray.push(articleObject)
+                articleArray.push(articleObject)
             }
           }
         }))
@@ -205,10 +172,10 @@ const getContent = async(req, res, next) => {
 
         const articlesText = await responseArticlesPage.text();
         var $ = cheerio.load(articlesText);
-        var articlesURL = [];
+        var articlesURL: String[]  = [];
 
         $('li.writing a').each((i,a)=>{
-            articlesURL.push($(a).attr('href'))
+            articlesURL.push($(a).attr('href')!)
         });
 
 
@@ -230,20 +197,21 @@ const getContent = async(req, res, next) => {
             var dateArray = dateString.split(' ');
 
             var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
-            dateArray[1] = months.indexOf(dateArray[1]) + 1;
+            dateArray[1] = (months.indexOf(dateArray[1]) + 1).toString();
             var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
-            var articleObject = 
-            {
-                title: $('#haberTitle').text(),
-                date: finalDate,
-                image: $('div.title img').attr('data-src'),
-                content,
-                newspaperID,
-                authorName:$('div.title span').first().text()
-            }
+
+            const title = $('#haberTitle').text();
+            const date = finalDate;
+            const image = $('div.title img').attr('data-src')!;
+            const authorName =$('div.title span').first().text();
+
+
+            const articleObject = new Article(title, date, image, content, newspaperID, authorName)
+
+              
             if(articleObject.content.length>10){
-               articles.articleArray.push(articleObject)
+               articleArray.push(articleObject)
             }
           }
         }))
@@ -261,10 +229,10 @@ const getContent = async(req, res, next) => {
 
             const articlesText = await responseArticlesPage.text();
             var $ = cheerio.load(articlesText);
-            var articlesURL = [];
+            var articlesURL: String[]  = [];
 
             $('a.columnist-card').each((i,a)=>{
-                articlesURL.push($(a).attr('href'))
+                articlesURL.push($(a).attr('href')!)
             });
 
 
@@ -288,21 +256,21 @@ const getContent = async(req, res, next) => {
                 dateString = dateString.substring(1,dateString.length)
                 var dateArray = dateString.split(' ');
                 var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
-                dateArray[1] = months.indexOf(dateArray[1]) + 1;
+                dateArray[1] = (months.indexOf(dateArray[1]) + 1).toString();
                 var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
-                var articleObject = 
-                {
-                    title: $('article h1').first().text(),
-                    date: finalDate,
-                    image: $('.columnist-header .img-holder img').first().attr('src'),
-                    content,
-                    newspaperID,
-                    authorName:$('article a.name').text()
-                }
+
+                   const title = $('article h1').first().text();
+                   const date = finalDate;
+                   const image = $('.columnist-header .img-holder img').first().attr('src')!;
+                   const authorName =$('article a.name').text();
+
+                const articleObject = new Article(title, date, image, content, newspaperID, authorName)
+
+                   
                 //pushNewsToDb(newsObject) 
                 if(articleObject.content.length>10){
-                    articles.articleArray.push(articleObject)
+                    articleArray.push(articleObject)
                 }
             }
             }))
@@ -311,6 +279,8 @@ const getContent = async(req, res, next) => {
 
 //// --CUMHURIYET-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
 else if (req.params.newspaper === "cumhuriyet") { 
+    console.log("cmh")
+
     const newspaperName = "Cumhuriyet"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
 
@@ -320,10 +290,10 @@ else if (req.params.newspaper === "cumhuriyet") {
 
         const articlesText = await responseArticlesPage.text();
         var $ = cheerio.load(articlesText);
-        var articlesURL = [];
+        var articlesURL: String[]  = [];
 
         $('.yazar-listesi > div a').each((i,a)=>{
-            articlesURL.push($(a).attr('href'))
+            articlesURL.push($(a).attr('href')!)
         });
 
 
@@ -349,19 +319,16 @@ else if (req.params.newspaper === "cumhuriyet") {
             var dateMonth = months.indexOf(dateArray[1]) + 1;
             var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
 
-            var articleObject = 
-            {
-                title: $('h1.baslik').first().text(),
-                date: finalDate,
-                image: `https://www.cumhuriyet.com.tr${$('.kose-yazisi-ust .bilgiler img').attr('src')}`,
-                content,
-                newspaperID,
-                authorName:$('.kose-yazisi-ust .adi').text()
-            }
-            //pushNewsToDb(newsObject) 
-            console.log(articleObject)
+            const title = $('h1.baslik').first().text();
+            const date = finalDate;
+            const image = `https://www.cumhuriyet.com.tr${$('.kose-yazisi-ust .bilgiler img').attr('src')}`;
+            const authorName =$('.kose-yazisi-ust .adi').text();
+
+            console.log(content)
+
+            const articleObject = new Article(title, date, image, content, newspaperID, authorName)
             if(articleObject.content.length>10){
-                articles.articleArray.push(articleObject)
+                articleArray.push(articleObject)
             }
         }
         }))
@@ -369,14 +336,10 @@ else if (req.params.newspaper === "cumhuriyet") {
 }
 
 
-    await Promise.all(articles.articleArray.map(async article =>  {
+    await Promise.all(articleArray.map(async article =>  {
         await checkAuthor(article)
     }))
 
 
     res.status(200).json({data:report});
 }
-
-module.exports = {
-    getContent, getAllArticles, searchForArticles, getNewspapersTest
-} 
