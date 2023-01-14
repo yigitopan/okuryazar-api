@@ -12,5 +12,4 @@ export const clientPG = new Client({
     },
     connectionTimeoutMillis: 3000
 });
-
 clientPG.connect();
