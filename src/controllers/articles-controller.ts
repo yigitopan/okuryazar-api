@@ -3,6 +3,7 @@ import { clientPG } from "../db";
 import fetch from "isomorphic-fetch";
 import cheerio from "cheerio";
 import { Article } from "../models/article";
+import { Console } from "console";
 
 const newspapers = ["Sözcü", "Milliyet", "Takvim", "Cumhuriyet"]
 
@@ -79,31 +80,28 @@ const pushArticlesToDb = async(articleObj: Article) => {
 }
 
 /////////////////
-
 export const searchForArticles:RequestHandler = async(req, res, next) => {
     const text = `SELECT article_id, title, author_name FROM articles WHERE LOWER(title) LIKE LOWER('%${req.params.query}%')`
     const results = await clientPG.query(text)
     res.status(200).json(results.rows)
 }
-
 /////////////////
-
-export const getAllArticles:RequestHandler = async(req, res, next) => { 
-    const text = 'SELECT * FROM public.articles ORDER BY article_id DESC'
+export const getAllArticles:RequestHandler = async(req, res, next) => {
+    const text = 'SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url FROM articles INNER JOIN authors ON articles.author_name = authors.author_name ORDER BY date'
     let articles;
             try {
                 const res = await clientPG.query(text)
                 articles = res.rows;
             } 
             catch (err) {
-                console.log("error adding")
+                console.log("error adding") 
             }
 
             res.status(200).json(articles);
 }
 
 export const scrapArticles:RequestHandler = async(req, res, next) => {
-       let articleArray: Article[] = [];
+    let articleArray: Article[] = [];
 
 //// --MILLIYET-- Codesequenz, um die Daten einer Nachricht, deren Link bestimmt ist, aufzurufen --MILLIYET-- ////
     if(req.params.newspaper === "milliyet"){
@@ -117,6 +115,7 @@ export const scrapArticles:RequestHandler = async(req, res, next) => {
         const articlesText = await responseArticlesPage.text();
         var $ = cheerio.load(articlesText);
         var articlesURL: String[] = [];
+
 
         $('div.card-listing a.card-listing__link').each((i,a)=>{
             articlesURL.push($(a).attr('href')!)
@@ -142,6 +141,10 @@ export const scrapArticles:RequestHandler = async(req, res, next) => {
 
             var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
             dateArray[1] = (months.indexOf(dateArray[1]) + 1).toString();
+
+            if(dateArray[1].length==1){
+                dateArray[1] = '0'+dateArray[1]
+            }
             var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
             const title = $('.article__title').text();
@@ -189,9 +192,14 @@ export const scrapArticles:RequestHandler = async(req, res, next) => {
             var $ = cheerio.load(text);
             var content = ""
 
-            $('#haberDescription p').each((i,p)=>{
+            $('#haberDescription p').each((i,p)=>{ // bazı yazılarda hiç <p> yok strong, ve br içeriyor
                 content = content.concat($(p).text().trim());
             });
+
+            if(content.length<10){
+                    content = ($('#haberDescription').text()); // gecici cözüm
+                    
+             }
 
             var dateString =  $('div.info ul').first().find('li').text().trim().split(',')[0];
             var dateArray = dateString.split(' ');
@@ -279,7 +287,6 @@ export const scrapArticles:RequestHandler = async(req, res, next) => {
 
 //// --CUMHURIYET-- Codesequenz, um die Daten einer Nachricht auf, deren Link bestimmt ist, aufzurufen --SOZCU-- ////
 else if (req.params.newspaper === "cumhuriyet") { 
-    console.log("cmh")
 
     const newspaperName = "Cumhuriyet"
         const newspaperID = newspapers.indexOf(newspaperName) + 1;
@@ -296,7 +303,6 @@ else if (req.params.newspaper === "cumhuriyet") {
             articlesURL.push($(a).attr('href')!)
         });
 
-
         await Promise.all(articlesURL.map(async url =>  {
         if(url.includes('yazarlar')) {
             const response = await fetch(
@@ -311,20 +317,22 @@ else if (req.params.newspaper === "cumhuriyet") {
             });
 
             var dateArray = $('.yayin-tarihi').text().trim().split(' ')
-            
             var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
             // dateArray[0] 15 (gun)
             // dateArray[1] Ekim (ay AMA yazıyla)
             // dateArray[2] 2022 (yil)
-            var dateMonth = months.indexOf(dateArray[1]) + 1;
+            var dateMonth = (months.indexOf(dateArray[1]) + 1).toString();
+            if(dateMonth.length==1){
+                dateMonth = '0'+dateMonth
+            }
             var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
+
+            console.log(finalDate)
 
             const title = $('h1.baslik').first().text();
             const date = finalDate;
             const image = `https://www.cumhuriyet.com.tr${$('.kose-yazisi-ust .bilgiler img').attr('src')}`;
             const authorName =$('.kose-yazisi-ust .adi').text();
-
-            console.log(content)
 
             const articleObject = new Article(title, date, image, content, newspaperID, authorName)
             if(articleObject.content.length>10){

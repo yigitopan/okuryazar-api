@@ -3,6 +3,7 @@ import { clientPG } from "../db";
 import fetch from "isomorphic-fetch";
 import cheerio from "cheerio";
 import { News } from "../models/news";
+import { isArray } from "util";
 
 const newspapers = ["Sözcü", "Milliyet", "Takvim", "Cumhuriyet"]
 var report = {
@@ -11,6 +12,19 @@ var report = {
 }
 let unChecked: string[] = [];
 
+const categories = new Map<string, string>([
+    ["gundem", "Gündem"],
+    ["spor", "Spor"],
+    ["ekonomi", "Ekonomi"],
+    ["dunya", "Dünya"]
+]);
+
+const newspaperID = new Map<string, number>([
+    ["sozcu", 1],
+    ["milliyet", 2],
+    ["takvim", 3],
+    ["cumhuriyet", 4]
+]);
 
 
 const pushNewsToDb = async(newObj: News) => {
@@ -65,6 +79,41 @@ export const getAllNews:RequestHandler = async(req, res, next) => {
             }
 
             res.status(200).json(news);
+}
+
+export const getByCategory:RequestHandler = async(req, res, next) => { 
+    const text = `SELECT * FROM public.news WHERE category_name = '${categories.get(req.params.category)}' ORDER BY news_id DESC`;
+       let news;
+               try {
+                   const res = await clientPG.query(text)
+                   news = res.rows;
+               } 
+               catch (err) {
+                   console.log("error adding")
+               }
+   
+               res.status(200).json(news);
+}
+
+export const getByNewspaper :RequestHandler = async(req, res, next) => { 
+    const text = `SELECT * FROM public.news WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY date DESC`;
+    const text2 = `SELECT * FROM public.articles WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY date DESC`;
+    let news;
+    let articles;
+            try {
+                const res = await clientPG.query(text)
+                news = res.rows;
+                
+                const res2 = await clientPG.query(text2)
+                articles = res2.rows;
+                
+    
+            } 
+            catch (err) {
+                console.log('error getting both')
+            }
+
+            res.status(200).json({news, articles});
 }
 
 
@@ -206,7 +255,7 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
                 */
                 var dateParts = dateString.split('.')
                 var finalDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` 
-
+                console.log(finalDate)
                 const title = $('#haberTitle').text();
                 const spot = $('#haberSpot').text();
                 const date = dateString;
@@ -385,14 +434,15 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
                 content = content.concat($(p).text().trim());
             });
 
-            var dateArray = $('.yayin-tarihi').text().trim().split(' ')
+            var dateFirst = $('.yayin-tarihi').text().trim().split(':')[1].split(' ')[0]
+            var dateArray = dateFirst.split('.')
             
-            var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
             // dateArray[0] 15 (gun)
             // dateArray[1] Ekim (ay AMA yazıyla)
             // dateArray[2] 2022 (yil)
-            var dateMonth = months.indexOf(dateArray[1]) + 1;
-            var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
+            var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0].replace('\n','')}` 
+
+
 
             const title =  $('h1.baslik').text();
             const spot = $('h2.spot').text();
