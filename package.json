@@ -14,13 +14,13 @@
     "express": "^4.18.1",
     "isomorphic-fetch": "^3.0.0",
     "nodemailer": "^6.8.0",
-    "pg": "^8.8.0"
+    "pg": "^8.8.0",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "tsc": "tsc",
     "start": "node dist/index.js",
     "postinstall": "npm run tsc"
-
   },
   "name": "inf303",
   "description": "��#\u0000 \u0000i\u0000n\u0000f\u00003\u00000\u00003\u0000\r\u0000 \u0000",
