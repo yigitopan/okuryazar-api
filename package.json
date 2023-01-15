@@ -17,8 +17,10 @@
     "pg": "^8.8.0"
   },
   "scripts": {
+    "tsc": "tsc",
     "start": "node dist/index.js",
-    "build": "tsc"
+    "postinstall": "npm run tsc"
+
   },
   "name": "inf303",
   "description": "��#\u0000 \u0000i\u0000n\u0000f\u00003\u00000\u00003\u0000\r\u0000 \u0000",
