@@ -255,10 +255,9 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
                 */
                 var dateParts = dateString.split('.')
                 var finalDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}` 
-                console.log(finalDate)
                 const title = $('#haberTitle').text();
                 const spot = $('#haberSpot').text();
-                const date = dateString;
+                const date = finalDate;
                 const image = $('.haberImg').attr('src');
                 
                 const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
@@ -434,13 +433,13 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
                 content = content.concat($(p).text().trim());
             });
 
-            var dateFirst = $('.yayin-tarihi').text().trim().split(':')[1].split(' ')[0]
-            var dateArray = dateFirst.split('.')
-            
+            var months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            var dateArray = $('.yayin-tarihi').first().text().split(':')[1].trim().split(' ');
             // dateArray[0] 15 (gun)
             // dateArray[1] Ekim (ay AMA yazıyla)
             // dateArray[2] 2022 (yil)
-            var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0].replace('\n','')}` 
+            var month = (months.indexOf(dateArray[1]) + 1).toString();
+            var finalDate = `${dateArray[2]}-${month}-${dateArray[0].replace('\n','')}` 
 
 
 
