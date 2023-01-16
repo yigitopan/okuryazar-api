@@ -96,24 +96,24 @@ export const getByCategory:RequestHandler = async(req, res, next) => {
 }
 
 export const getByNewspaper :RequestHandler = async(req, res, next) => { 
-    const text = 
-    `SELECT * FROM (SELECT title, date, img_url, context, null as spot, articles.author_name, newspaper_id, null AS category_name FROM articles INNER JOIN authors ON articles.author_name = authors.author_name 
-    UNION 
-    SELECT title, date, img_url, context, spot, null as author_name,newspaper_id, category_name from News) 
-    AS SearchResult 
-    WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY date DESC;
-    `
-    let items;
+    const text = `SELECT * FROM public.news WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY date DESC`;
+    const text2 = `SELECT * FROM public.articles WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY date DESC`;
+    let news;
+    let articles;
             try {
                 const res = await clientPG.query(text)
-                items = res.rows;
+                news = res.rows;
+                
+                const res2 = await clientPG.query(text2)
+                articles = res2.rows;
+                
     
             } 
             catch (err) {
                 console.log('error getting both')
             }
 
-            res.status(200).json(items);
+            res.status(200).json({news, articles});
 }
 
 
