@@ -87,7 +87,7 @@ export const searchForArticles:RequestHandler = async(req, res, next) => {
 }
 /////////////////
 export const getAllArticles:RequestHandler = async(req, res, next) => {
-    const text = 'SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url FROM articles INNER JOIN authors ON articles.author_name = authors.author_name ORDER BY date'
+    const text = 'SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url FROM articles INNER JOIN authors ON articles.author_name = authors.author_name ORDER BY article_id DESC'
     let articles;
             try {
                 const res = await clientPG.query(text)
