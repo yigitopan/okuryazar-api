@@ -170,10 +170,9 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
             const spot = $('.news-content__inf h2').first().text();
             const title = $('h1.news-detail-title').text();
             const date = finalDate;
-            const image = $('.rhd-spot-img-cover').attr('src');
-
+            const image = $('.news-media').find('img').first().attr('data-src');
             const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
-
+            console.log(newsObject.image)
             nachrictArray.push(newsObject)
         }))
 
