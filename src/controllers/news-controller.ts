@@ -68,7 +68,7 @@ const pushNewsToDb = async(newObj: News) => {
 }
 
 export const getAllNews:RequestHandler = async(req, res, next) => { 
- const text = 'SELECT * FROM public.news ORDER BY news_id DESC'
+ const text = "SELECT * from news WHERE date BETWEEN LOCALTIMESTAMP - INTERVAL '3 days' AND LOCALTIMESTAMP ORDER BY news_id DESC"
     let news;
             try {
                 const res = await clientPG.query(text)
