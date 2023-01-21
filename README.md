@@ -10,7 +10,7 @@ Open-source bundle app for turkish news. This repository serves to the back-end 
     </div>
     <img src="https://i.hizliresim.com/xy973c2.png" width="120"  /><img src="https://i.hizliresim.com/szaiypi.png" width="110"  />
   </div>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/2367px-Vue.js_Logo_2.svg.png" width="100"  /><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Tailwind_CSS_Logo.svg/2048px-Tailwind_CSS_Logo.svg.png" width="100"  /><img src="https://vitejs.dev/logo-with-shadow.png" width="100"  />
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/2367px-Vue.js_Logo_2.svg.png" width="100"  /><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Tailwind_CSS_Logo.svg/2048px-Tailwind_CSS_Logo.svg.png" width="100"  /><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1985px-Postgresql_elephant.svg.png" width="100"  />
 </div>
   
 
