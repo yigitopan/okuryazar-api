@@ -22,7 +22,7 @@ export const getArticlesOfAuthor:RequestHandler = async(req, res, next) => {
      (SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url 
      FROM articles 
      INNER JOIN authors ON articles.author_name = authors.author_name 
-     ORDER BY date) as Results WHERE LOWER(author_name) = '${searchQuery}'`
+     ORDER BY date) as Results WHERE LOWER(author_name) = '${searchQuery}' ORDER BY article_id DESC`
 
     let articles;
             try {
