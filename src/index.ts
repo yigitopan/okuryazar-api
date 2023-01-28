@@ -8,11 +8,12 @@ import newsRoutes from './routes/news-routes';
 import articleRoutes from './routes/article-routes';
 import authorRoutes from './routes/author-routes';
 import searchRoutes from './routes/search-routes';
-
+import compresssion from 'compression'
 dotenv.config();
 
 
 const app = express();
+app.use(compresssion());
 app.use(bodyParser.json());
 app.use(cors());
 
