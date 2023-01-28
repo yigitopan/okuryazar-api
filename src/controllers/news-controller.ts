@@ -82,7 +82,7 @@ export const getAllNews:RequestHandler = async(req, res, next) => {
 }
 
 export const getByCategory:RequestHandler = async(req, res, next) => { 
-    const text = `SELECT * FROM public.news WHERE category_name = '${categories.get(req.params.category)}' ORDER BY news_id DESC`;
+    const text = `SELECT * FROM public.news WHERE category_name = '${categories.get(req.params.category)}' AND date BETWEEN LOCALTIMESTAMP - INTERVAL '4 days' AND LOCALTIMESTAMP ORDER BY news_id DESC`;
        let news;
                try {
                    const res = await clientPG.query(text)
@@ -96,8 +96,8 @@ export const getByCategory:RequestHandler = async(req, res, next) => {
 }
 
 export const getByNewspaper :RequestHandler = async(req, res, next) => { 
-    const text = `SELECT * FROM public.news WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY news_id DESC`;
-    const text2 = `SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url FROM articles INNER JOIN authors ON articles.author_name = authors.author_name WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' ORDER BY article_id DESC`
+    const text = `SELECT * FROM public.news WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' AND date BETWEEN LOCALTIMESTAMP - INTERVAL '4 days' AND LOCALTIMESTAMP ORDER BY news_id DESC`
+    const text2 = `SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url FROM articles INNER JOIN authors ON articles.author_name = authors.author_name WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' AND date BETWEEN LOCALTIMESTAMP - INTERVAL '4 days' AND LOCALTIMESTAMP ORDER BY article_id DESC`
     let news;
     let articles;
             try {
