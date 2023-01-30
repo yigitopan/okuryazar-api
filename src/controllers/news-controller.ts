@@ -369,6 +369,7 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
         // dateArray[0] 15 (gun)
         // dateArray[1] Ekim (ay AMA yazıyla)
         // dateArray[2] 2022 (yil)
+        
         dateArray[1] = (months.indexOf(dateArray[1]) + 1).toString();
         var finalDate = `${dateArray[2]}-${dateArray[1]}-${dateArray[0]}` 
 
