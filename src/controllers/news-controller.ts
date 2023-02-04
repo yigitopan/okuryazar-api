@@ -96,7 +96,7 @@ export const getByCategory:RequestHandler = async(req, res, next) => {
 }
 
 export const getByNewspaper :RequestHandler = async(req, res, next) => { 
-    const text = `SELECT * FROM public.news WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' AND date BETWEEN LOCALTIMESTAMP - INTERVAL '4 days' AND LOCALTIMESTAMP ORDER BY news_id DESC`
+    const text = `SELECT * FROM public.news WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' AND date BETWEEN LOCALTIMESTAMP - INTERVAL '4 days' AND LOCALTIMESTAMP ORDER BY date DESC`
     const text2 = `SELECT article_id, title, context, newspaper_id, date, articles.author_name, img_url FROM articles INNER JOIN authors ON articles.author_name = authors.author_name WHERE newspaper_id = '${newspaperID.get(req.params.newspaper)}' AND date BETWEEN LOCALTIMESTAMP - INTERVAL '4 days' AND LOCALTIMESTAMP ORDER BY date DESC`
     let news;
     let articles;
