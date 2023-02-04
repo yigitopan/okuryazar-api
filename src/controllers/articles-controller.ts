@@ -336,8 +336,7 @@ else if (req.params.newspaper === "cumhuriyet") {
 
             const articleObject = new Article(title, date, image, content, newspaperID, authorName)
             if(articleObject.content.length>10){
-                console.log(articleObject)
-                //articleArray.push(articleObject)
+                articleArray.push(articleObject)
             }
         }
         }))
