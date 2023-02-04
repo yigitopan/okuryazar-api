@@ -332,11 +332,12 @@ else if (req.params.newspaper === "cumhuriyet") {
             const title = $('h1.baslik').first().text();
             const date = finalDate;
             const image = `https://www.cumhuriyet.com.tr${$('.kose-yazisi-ust .bilgiler img').attr('src')}`;
-            const authorName =$('.kose-yazisi-ust .adi').text();
+            const authorName =$('.kose-yazisi-ust').first().find('.adi').text();
 
             const articleObject = new Article(title, date, image, content, newspaperID, authorName)
             if(articleObject.content.length>10){
-                articleArray.push(articleObject)
+                console.log(articleObject)
+                //articleArray.push(articleObject)
             }
         }
         }))
