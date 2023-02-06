@@ -260,10 +260,7 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
                 const image = $('.haberImg').attr('src');
                 
                 const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
-                //BU BİR
-                console.log(newsObject)
-                //nachrictArray.push(newsObject)
-                //nachrichten.nachrictArray.push(newsObject)
+                nachrictArray.push(newsObject)
             }
             ///GALERIYSE
             else {
@@ -292,9 +289,7 @@ export const scrapNews:RequestHandler = async(req, res, next) => {
                 const image =  $('.figure img.lazyload').first().attr('data-src');
 
                 const newsObject = new News(title, spot, date, image!, content, newspaperID, categoryName);
-                              //BU 2
-                              console.log(newsObject)
-                              //nachrictArray.push(newsObject)
+                nachrictArray.push(newsObject)
             }
         }))
 

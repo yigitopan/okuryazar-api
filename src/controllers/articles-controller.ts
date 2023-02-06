@@ -327,8 +327,6 @@ else if (req.params.newspaper === "cumhuriyet") {
             }
             var finalDate = `${dateArray[2]}-${dateMonth}-${dateArray[0]}` 
 
-            console.log(finalDate)
-
             const title = $('h1.baslik').first().text();
             const date = finalDate;
             const image = `https://www.cumhuriyet.com.tr${$('.kose-yazisi-ust .bilgiler img').attr('src')}`;
