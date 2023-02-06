@@ -1,4 +1,7 @@
-## Okuryazar
+<div align="center">
+<img src="https://raw.githubusercontent.com/yigitopan/okuryazar-client/main/src/assets/okuryazar-logo.svg" width="125"  /><img src="https://i.hizliresim.com/rbtotp9.png" width="125"  />
+</div>
+
 ### Now online at [okuryazar.dev](https://www.okuryazar.dev)!
 Open-source bundle app for turkish news. This repository serves to the back-end of the project. For client side, [click here](https://github.com/yigitopan/okuryazar-client)
 
