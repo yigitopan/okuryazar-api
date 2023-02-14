@@ -22,6 +22,23 @@ Open-source bundle API for turkish news. This repository serves to the back-end 
 An API designed to be used in a potential bundle application, which stores news and columns in Turkish newspapers in SQL database. <br><br>
 Currently supported newspapers: Cumhuriyet, Takvim, Sözcü, Milliyet
 
+Endpoints:
+| URL                                                              | Purpose                                                                            |
+| -----------------------------------------------------------------|:----------------------------------------------------------------------------------:|
+| http://inf303.herokuapp.com/okuryazar-api/get/news/all           | gets all news saved in DB from 4 newspapers in last 3 days.                        |
+| http://inf303.herokuapp.com/okuryazar-api/get/articles/all       | gets all articles with authors saved in DB from 4 newspapers in last 3 days.       |
+| http://inf303.herokuapp.com/okuryazar-api/get/both/$NEWSPAPER    | gets all news & articles saved in DB from a specific newspaper.                    |
+| http://inf303.herokuapp.com/okuryazar-api/search/$QUERY          | gets all news & articles that includes query within title or context               |
+| http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | gets all news of a specific category saved in DB from 4 newspapers in last 3 days. |
+
+
+
+
+http://inf303.herokuapp.com/okuryazar-api/get/both/$NEWSPAPER
+http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY
+
+
+
  
  Structure:
  ![alt text](https://i.hizliresim.com/b098ftl.png)
