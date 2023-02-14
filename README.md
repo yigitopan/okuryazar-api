@@ -32,11 +32,12 @@ Endpoints:
 | http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | gets all news of a specific category saved in DB from 4 newspapers in last 3 days. |
 
 
-
-
-http://inf303.herokuapp.com/okuryazar-api/get/both/$NEWSPAPER
-http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY
-
+| Newspaper params  | Category params |
+|-------------------|:---------------:|
+| sozcu             | gundem          |
+| takvim            | dunya           |
+| milliyet          | ekonomi         |
+| cumhuriyet        | spor            |
 
 
  
