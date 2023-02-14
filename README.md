@@ -39,6 +39,12 @@ Endpoints:
 | http://inf303.herokuapp.com/okuryazar-api/search/$QUERY          | gets all news & articles that includes query within title or context               |
 | http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | gets all news of a specific category saved in DB from 4 newspapers in last 3 days. |
 
+The search query can contain special characters. Spaces must be separated by the + symbol. For example:
+http://inf303.herokuapp.com/okuryazar-api/search/england+soccer
+
+Response:
+[{"title":"Saha buz tuttu, Chelsea-Liverpool maçı ertelendi","date":"2023-01-22T00:00:00.000Z","img_url":"https://i.sozcucdn.com/wp-content/uploads/2023/01/22/2023-01-22t125733z_1662644420_up1ej1m0zzvfc_rtrmadp_3_soccer-england-che-liv-report.jpeg?w=776&h=436&mode=crop","context":"İngiltere Kadınlar Süper Lig’de Chelsea ile Liverpool arasındaki karşılaşma, sahanın donması nedeniyle ertelendi.Ligin 12. haftasında lider Chelsea’nin, başkent Londra’daki Kingsmeadow Stadı’nda Liverpool’u konuk ettiği karşılaşma, kötü hava koşullarının ardından sahanın buz tutması nedeniyle 6. dakikada yarıda kaldı.Fotoğraf: Reuters.İngiltere Futbol Federasyonu, oyuncu sağlığının ön planda tutulması nedeniyle hakemin maçı erteleme yönünde karar aldığını vurguladı.Karşılaşma, federasyonun duyuracağı ileri bir tarihte oynanacak. (AA)Fotoğraf: Reuters.Fotoğraf: Reuters.","spot":"Liverpool ve Chelsea kadın futbol takımları arasındaki maç, sahanın buz tutması nedeniyle ileri bir tarihe ertelendi.","author_name":null,"newspaper_id":1,"category_name":"Spor"}]
+
 
 
 
