@@ -23,6 +23,14 @@ An API designed to be used in a potential bundle application, which stores news 
 Currently supported newspapers: Cumhuriyet, Takvim, Sözcü, Milliyet
 
 Endpoints:
+
+| Newspaper params  | Category params |
+|-------------------|:---------------:|
+| sozcu             | gundem          |
+| takvim            | dunya           |
+| milliyet          | ekonomi         |
+| cumhuriyet        | spor            |
+
 | URL                                                              | Purpose                                                                            |
 | -----------------------------------------------------------------|:----------------------------------------------------------------------------------:|
 | http://inf303.herokuapp.com/okuryazar-api/get/news/all           | gets all news saved in DB from 4 newspapers in last 3 days.                        |
@@ -32,12 +40,7 @@ Endpoints:
 | http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | gets all news of a specific category saved in DB from 4 newspapers in last 3 days. |
 
 
-| Newspaper params  | Category params |
-|-------------------|:---------------:|
-| sozcu             | gundem          |
-| takvim            | dunya           |
-| milliyet          | ekonomi         |
-| cumhuriyet        | spor            |
+
 
 
  
