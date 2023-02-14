@@ -33,11 +33,11 @@ Endpoints:
 
 | URL                                                              | Purpose                                                                            |
 | -----------------------------------------------------------------|------------------------------------------------------------------------------------|
-| http://inf303.herokuapp.com/okuryazar-api/get/news/all           | gets all news saved in DB from 4 newspapers in last 3 days.                        |
-| http://inf303.herokuapp.com/okuryazar-api/get/articles/all       | gets all articles with authors saved in DB from 4 newspapers in last 3 days.       |
-| http://inf303.herokuapp.com/okuryazar-api/get/both/$NEWSPAPER    | gets all news & articles saved in DB from a specific newspaper.                    |
-| http://inf303.herokuapp.com/okuryazar-api/search/$QUERY          | gets all news & articles that includes query within title or context               |
-| http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | gets all news of a specific category saved in DB from 4 newspapers in last 3 days. |
+| http://inf303.herokuapp.com/okuryazar-api/get/news/all           | retrieves all news saved in DB from 4 newspapers in last 3 days.                   |
+| http://inf303.herokuapp.com/okuryazar-api/get/articles/all       | retrieves all articles with authors saved in DB from 4 newspapers in last 3 days.  |
+| http://inf303.herokuapp.com/okuryazar-api/get/both/$NEWSPAPER    | retrieves all news & articles from a specific newspaper in last 3 days.            |
+| http://inf303.herokuapp.com/okuryazar-api/search/$QUERY          | retrieves all news and articles that contain the query in the title or context.    |
+| http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | retrieves all news of a specific category from 4 newspapers in last 3 days.        |
 
 The search query can contain special characters. Spaces must be separated by the + symbol. For example:
 http://inf303.herokuapp.com/okuryazar-api/search/england+soccer
