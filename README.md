@@ -3,7 +3,7 @@
 </div>
 
 ### Now online at [okuryazar.dev](https://www.okuryazar.dev)!
-Open-source bundle app for turkish news. This repository serves to the back-end of the project. For client side, [click here](https://github.com/yigitopan/okuryazar-client)
+Open-source bundle API for turkish news. This repository serves to the back-end of the project. For client side, [click here](https://github.com/yigitopan/okuryazar-client)
 
 <div align="center">
   <div align="center">
