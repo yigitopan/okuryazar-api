@@ -40,7 +40,7 @@ Endpoints:
 | http://inf303.herokuapp.com/okuryazar-api/get/category/$CATEGORY | retrieves all news of a specific category from 4 newspapers in last 3 days.        |
 
 The search query can contain special characters. Spaces must be separated by the + symbol. For example:
-http://inf303.herokuapp.com/okuryazar-api/search/england+soccer
+http://inf303.herokuapp.com/okuryazar-api/search/ingiltere+futbol
 
 
 
