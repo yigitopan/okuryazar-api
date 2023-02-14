@@ -25,14 +25,14 @@ Currently supported newspapers: Cumhuriyet, Takvim, Sözcü, Milliyet
 Endpoints:
 
 | Newspaper params  | Category params |
-|-------------------|:---------------:|
+|:-----------------:|:---------------:|
 | sozcu             | gundem          |
 | takvim            | dunya           |
 | milliyet          | ekonomi         |
 | cumhuriyet        | spor            |
 
 | URL                                                              | Purpose                                                                            |
-| -----------------------------------------------------------------|:----------------------------------------------------------------------------------:|
+| -----------------------------------------------------------------|------------------------------------------------------------------------------------|
 | http://inf303.herokuapp.com/okuryazar-api/get/news/all           | gets all news saved in DB from 4 newspapers in last 3 days.                        |
 | http://inf303.herokuapp.com/okuryazar-api/get/articles/all       | gets all articles with authors saved in DB from 4 newspapers in last 3 days.       |
 | http://inf303.herokuapp.com/okuryazar-api/get/both/$NEWSPAPER    | gets all news & articles saved in DB from a specific newspaper.                    |
