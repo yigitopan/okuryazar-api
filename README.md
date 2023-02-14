@@ -48,14 +48,24 @@ Response:
 ```json
 [
   {
-    "title":"Saha buz tuttu, Chelsea-Liverpool maçı ertelendi",
-    "date":"2023-01-22T00:00:00.000Z",
-    "img_url":"https://i.sozcucdn.com/wp-content/uploads/2023/01/22/2023-01-22t125733z_1662644420_up1ej1m0zzvfc_rtrmadp_3_soccer-england-che-liv-report.jpeg?w=776&h=436&mode=crop",
-    "context":"İngiltere Kadınlar Süper Lig’de Chelsea ile Liverpool arasındaki karşılaşma, sahanın donması nedeniyle ertelendi.Ligin 12. haftasında lider Chelsea’nin, başkent Londra’daki Kingsmeadow Stadı’nda Liverpool’u konuk ettiği karşılaşma, kötü hava koşullarının ardından sahanın buz tutması nedeniyle 6. dakikada yarıda kaldı.Fotoğraf: Reuters.İngiltere Futbol Federasyonu, oyuncu sağlığının ön planda tutulması nedeniyle hakemin maçı erteleme yönünde karar aldığını vurguladı.Karşılaşma, federasyonun duyuracağı ileri bir tarihte oynanacak. (AA)Fotoğraf: Reuters.Fotoğraf: Reuters.",
-    "spot":"Liverpool ve Chelsea kadın futbol takımları arasındaki maç, sahanın buz tutması nedeniyle ileri bir tarihe ertelendi.",
-    "author_name":null,
-    "newspaper_id":1,
-    "category_name":"Spor"
+    "title": "Saha buz tuttu, Chelsea-Liverpool maçı ertelendi",
+    "date": "2023-01-22T00:00:00.000Z",
+    "img_url": "https://i.sozcucdn.com/wp-content/uploads/2023/01/22/2023-01-22t125733z_1662644420_up1ej1m0zzvfc_rtrmadp_3_soccer-england-che-liv-report.jpeg?w=776&h=436&mode=crop",
+    "context": "İngiltere Kadınlar Süper Lig’de Chelsea ile Liverpool arasındaki karşılaşma, sahanın donması nedeniyle ertelendi.Ligin 12. haftasında lider Chelsea’nin, başkent Londra’daki Kingsmeadow Stadı’nda Liverpool’u konuk ettiği karşılaşma, kötü hava koşullarının ardından sahanın buz tutması nedeniyle 6. dakikada yarıda kaldı.Fotoğraf: Reuters.İngiltere Futbol Federasyonu, oyuncu sağlığının ön planda tutulması nedeniyle hakemin maçı erteleme yönünde karar aldığını vurguladı.Karşılaşma, federasyonun duyuracağı ileri bir tarihte oynanacak. (AA)Fotoğraf: Reuters.Fotoğraf: Reuters.",
+    "spot": "Liverpool ve Chelsea kadın futbol takımları arasındaki maç, sahanın buz tutması nedeniyle ileri bir tarihe ertelendi.",
+    "author_name": null,
+    "newspaper_id": 1,
+    "category_name": "Spor"
+  },
+  {
+    "title": "2022 Dünya Kupası çeyrek final maçında Hırvatistan, Brezilya'yı penaltı atışlarında eleyerek yarı finale yükseldi",
+    "date": "2022-09-12T00:00:00.000Z",
+    "img_url": "https://iatkv.tmgrup.com.tr/8d9717/616/321/0/0/960/500?u=https%3a%2f%2fitkv.tmgrup.com.tr%2f2022%2f12%2f09%2f2022-dunya-kupasi-ceyrek-final-macinda-hirvatistan-brezilyayi-penalti-atislarinda-eleyerek-yari-finale-yukseld-1670609529815.jpg",
+    "context": "2022 FIFA Dünya Kupası çeyrek final maçında Hırvatistan, Brezilya'yı penaltılar sonucu 4-2 mağlup ederek yarı finale çıkan ilk takım oldu.Katar Education City Stadı'nda Brezilya ile Hırvatistan karşı karşıya geldi.İngiltere Futbol Federasyonu'ndan Michael Oliver'ın düdük çaldığı karşılaşmanın normal süresi 0-0 bitti. Uzatmalara giden karşılaşmada 105+1'inci dakikada Brezilya Neymar ile öne geçmeyi başardı.Ancak Hırvatistan 117'nci dakikada Petkovic ile Neymar'a cevap vererek karşılaşmayı penaltılara taşımayı başardı. Seri penaltı atışları sonrası Hırvatistan, Brezilya'yı 4-2'lik skor ile mağlup etti.Hırvatistan'da Vlasic, Majer, Modric ve Orsic penaltıları değerlendirirken; Brezilya'da ise Casemiro ve Pedro fileleri havalandırdı, Rodrygo ve Marquinhos ise penaltıdan yararlanamadı. Bu sonucun ardından Hırvatistan, Dünya Kupası'nda yarı finale yükselen takım oldu.NEYMAR, PELE'NİN REKORUNA ORTAK\nUzatma devresinde 1-1 berabere kalarak seri penaltı atışları sonrası yarı finalisti belirlenen karşılaşmada Neymar, takımının 105'inci dakikada tek golünü atarak Brezilya tarihinin en golcü futbolcusu olan Pele'nin rekoruna ortak oldu. 30 yaşındaki oyuncu, uzatma devresinde Hırvatistan'a attığı gol ile toplam 77 gole ulaşarak Pele'yi yakaladı.PENALTI ATIŞLARI\nHırvatistan'da Vlasic, Majer, Modric ve Orsic topu ağlara gönderdi. Brezilya'da ise Casemiro ile Pedro fileleri havalandırırken, Rodrygo ve Marquinhos ise penaltı atışından faydalanamadı.Brezilya'ya penaltılarda 4-2 üstünlük kuran Hırvatistan, adını yarı finale yazdırdı.Rusya 2018'in ikincisi Hırvatistan, yarı finalde Hollanda-Arjantin eşleşmesinin galibiyle kozlarını paylaşacak.Favorisi olarak gösterildiği turnuvaya çeyrek finalde veda eden Brezilya ise taraftarına büyük üzüntü yaşattı.LİVAKOVİC'DEN KRİTİK KURTARIŞLAR\nHırvatistan'ın kalecisi Dominik Livakovic, ikinci yarıda yaptığı önemli kurtarışlarla takımının yarı finale çıkmasında başrol üstlendi.Livakovic, Brezilya'nın 47, 55, 66 ve 76. dakikada geliştirdiği ataklarda kalesinde devleşerek gole izin vermedi.Penaltılarda da bir kurtarışa imza atan Livakovic, maçın en değerli oyuncusu seçildi.Livakovic, Hırvatistan'ın Japonya'ya üstünlük sağladığı son 16 turunda da seri penaltı atışlarında 3 kurtarış yapmış ve takımının çeyrek finale çıkmasını sağlamıştı.MAÇTAN DAKİKALAR\n5' Sol çaprazda kontrol ettiği top sonrası kaleye yönelen Vinicius'un sert şutunda top Livakovic'te kaldı.13' Boş alanı iyi değerlendiren Juranovic, sürdüğü topu boş durumdaki Pasalic'e aktardı. Pasalic'in ceza sahasına yaptığı ortaya hareketlenen Perisic'in dokunduğu top auta çıktı.20' Sol kulvarı etkili kullanan Vinicius, Richarlison'la yaptığı duvar pası sonrası kaleye yakın mesafeden şutunu attı, Gvardiol'dan seken top sonrası Brezilya atağı devam etti. Neymar'ın şutunda kaleci Livakovic, rahat bir şekilde topun kontrolünü sağladı.İlk 45 dakikada eşitlik bozulmadı.54' Richarlison harika döndü, rakibinden şık sıyrıldı, derin topu yolladı, Neymar ceza alanı sol çaprazından vurdu ancak kaleci Livakovic'i geçemedi.66' Neymar'ın sol kanattan içeri çevirdiği topa koşu yapan Paqueta, Hırvatistan savunmasının hatasıyla kaleye çok yakın mesafede topla buluştu. Yıldız oyuncunun vuruşunda kalesinde devleşen Livakovic, topun son anda kurtardı.85' Hırvatistan kalesine yüklenen Brezilya, tehlikeli geldi. Oluşan karambol sonrası ceza sahasında Militao'nun şutunda top auta çıktı.",
+    "spot": "Son dakika Dünya Kupası haberleri! 2022 Dünya Kupası çeyrek final maçında Hırvatistan ile Brezilya karşı karşıya geldi. Dengeli bir oyunun sergilendiği karşılaşmada 90 dakikada gol sesi çıkmayınca maç uzatmalara gitti. Uzatmalarda 105. dakikada Neymar ile 1-0 öne geçen Sambacılara, 116. dakikada Hırvatlar, Petkovic karşılık verdi. Penatılara giden karşılaşmada gülen taraf Hırvatistan oldu.",
+    "author_name": null,
+    "newspaper_id": 3,
+    "category_name": "Spor"
   }
 ]
 ```
