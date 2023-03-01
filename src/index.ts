@@ -25,5 +25,4 @@ app.use('/okuryazar-api', searchRoutes);
 
 app.listen(process.env.PORT || 5000);
 
-
 console.log("Connected");
