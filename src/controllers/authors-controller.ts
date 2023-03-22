@@ -30,7 +30,7 @@ export const getArticlesOfAuthor:RequestHandler = async(req, res, next) => {
                 articles = res.rows;
             } 
             catch (err) {
-                console.log("error getting")
+                console.log("error getting ")
             }
 
             res.status(200).json(articles);
