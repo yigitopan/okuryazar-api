@@ -23,6 +23,6 @@ app.use('/okuryazar-api', newsRoutes);
 app.use('/okuryazar-api', authorRoutes);
 app.use('/okuryazar-api', searchRoutes);
 
-app.listen(process.env.PORT || 5000);
+app.listen(process.env.PORT || 3000);
 
 console.log("Connected");
