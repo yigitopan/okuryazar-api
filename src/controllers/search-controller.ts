@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { clientPG } from "../db";
-import { ChromosomController } from "../controllers/ChromosomController";
+
 
 
 export const search: RequestHandler = async(req, res, next) =>  {
@@ -21,17 +21,3 @@ export const search: RequestHandler = async(req, res, next) =>  {
     res.status(200).json(results.rows)
 }
 
-
-export const dataEndpoint:RequestHandler = async(req, res, next) => {
-    console.time();
-   
-    const CC = new ChromosomController(74, 2400)
-
-    CC.lebenUndLebenLassen(50, 200000)
-    
-    const data = CC.getResultate();
-    CC.ergebnis()
-    console.timeEnd();
-
-    res.status(200).json({data});
-}
